@@ -5,7 +5,7 @@ use std::io::Error as IOError;
 use std::process::Command;
 use std::str::{from_utf8, Utf8Error};
 
-pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, maker: &str) -> Result<(), Error> {
+pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, model: &str, maker: &str) -> Result<(), Error> {
     if files.len() != exposures.len() {
         return Err(Error::BadInformation);
     }
@@ -16,13 +16,13 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, ma
         debug!("File: {}", file);
         debug!("Exposure: {:?}", exposure);
 
-        exif(file, exposure, maker)?;
+        exif(file, exposure, model, maker)?;
     }
 
     Ok(())
 }
 
-pub fn exif(file: &str, exposure: &ExposureInfo, maker: &str) -> Result<(), Error> {
+pub fn exif(file: &str, exposure: &ExposureInfo, model: &str, maker: &str) -> Result<(), Error> {
     let mut cmd = Command::new("perl");
 
     cmd.arg("./deps/exiftool/exiftool")
@@ -37,6 +37,7 @@ pub fn exif(file: &str, exposure: &ExposureInfo, maker: &str) -> Result<(), Erro
         .arg(format!("-iso={}", exposure.iso))
         .arg(format!("-LensModel={}", exposure.lens_name))
         .arg(format!("-Make={}", maker))
+        .arg(format!("-Model={}", model))
         .arg(file);
 
     let child = cmd.spawn().context(ExiftoolSpawnSnafu)?;

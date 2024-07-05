@@ -22,7 +22,7 @@ fn main() {
     let photo_paths = get_photos(source_path).unwrap();
     let exposures = read_metadata(metadata_path).unwrap();
 
-    update_exif_metadata(photo_paths, exposures, &args.maker).unwrap();
+    update_exif_metadata(photo_paths, exposures, &args.camera, &args.maker).unwrap();
 }
 
 #[derive(Parser, Debug)]
