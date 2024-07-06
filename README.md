@@ -1,4 +1,4 @@
-# film_exif_fixer
+# Film Exif Fixer
 
 ## About
 
