@@ -25,7 +25,12 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, mo
 pub fn exif(file: &str, exposure: &ExposureInfo, model: &str, maker: &str) -> Result<(), Error> {
     let mut cmd = Command::new("perl");
 
-    cmd.arg("./deps/exiftool/exiftool")
+    let path = std::env::current_dir().unwrap();
+    let exiftool_path = path.join("deps").join("exiftool").join("exiftool");
+
+    debug!("Exiftool Dir {:?}", exiftool_path);
+
+    cmd.arg(exiftool_path)
         .arg(format!("-AllDates={}", exposure.date))
         .arg(format!("-fnumber={}", exposure.aperture))
         .arg(format!("-aperturevalue={}", exposure.aperture))
