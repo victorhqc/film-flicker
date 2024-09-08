@@ -57,7 +57,7 @@ pub fn spawn_exiftool(_exiftool_path: &PathBuf) -> Result<Command, Error> {
 }
 
 #[cfg(target_os = "windows")]
-pub fn spawn_exiftool(exiftool_path: &PathBuf) -> Result<Command, Error> {
+pub fn spawn_exiftool(exiftool_path: &Path) -> Result<Command, Error> {
     let mut cmd = Command::new(exiftool_path);
 
     cmd.creation_flags(CREATE_NO_WINDOW);
