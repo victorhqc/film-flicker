@@ -17,11 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
       - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
@@ -45,16 +40,15 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --manifest-path ./src-tauri/Cargo.toml --workspace
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --manifest-path ./src-tauri/Cargo.toml --all --check
+          args: --all --check
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --manifest-path ./src-tauri/Cargo.toml -- -D warnings
+          args: -- -D warnings
