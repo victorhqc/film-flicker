@@ -2,6 +2,8 @@ use regex::Regex;
 use serde::Deserialize;
 use snafu::prelude::*;
 use std::path::Path;
+use std::str::FromStr;
+use fraction::{Fraction, ToPrimitive, error::ParseError};
 
 pub fn read_metadata(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
     let mut rdr = csv::Reader::from_path(path).context(InvalidCSVSnafu)?;
@@ -25,17 +27,18 @@ pub struct ExposureInfo {
     pub iso: i32,
     pub aperture: f32,
     pub shutter_speed: String,
+    pub exposure_compensation: Option<f32>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct BuildExposureInfo {
-
     lens_name: String,
     focal_length: f32,
     date: String,
     iso: i32,
     aperture: f32,
     shutter_speed: String,
+    exposure_compensation: Option<String>,
 }
 
 impl ExposureInfo {
@@ -46,6 +49,8 @@ impl ExposureInfo {
             });
         }
 
+        let exp_comp = parse_exposure_compensation(&args.exposure_compensation)?;
+
         let result = ExposureInfo {
             lens_name: args.lens_name,
             date: args.date,
@@ -53,6 +58,7 @@ impl ExposureInfo {
             focal_length: args.focal_length,
             aperture: args.aperture,
             shutter_speed: args.shutter_speed,
+            exposure_compensation: exp_comp,
         };
 
         Ok(result)
@@ -62,6 +68,31 @@ impl ExposureInfo {
         let expr = Regex::new(r#"1/\d+|\d+""#).unwrap();
 
         expr.is_match(txt)
+    }
+}
+
+fn parse_exposure_compensation(exposure_compensation: &Option<String>) -> Result<Option<f32>, Error> {
+    if let Some(exp_comp) = exposure_compensation {
+        // This to allow the format of "1 1/3" or "2 2/3"
+        let parts = exp_comp.split(" ").collect::<Vec<&str>>();
+        if parts.len() > 2 {
+            return Err(Error::InvalidExposureCompensation { value: exp_comp.clone() })
+        }
+
+        let float: f32 = parts.iter().fold(0.0, |acc, part| {
+            let float = Fraction::from_str(part).context(ExposureCompensationSnafu { value: exp_comp.clone() }).unwrap();
+            let float: f32 = float.to_f32().unwrap();
+
+            if acc >= 0.0 {
+                acc + float
+            } else {
+                acc - float
+            }
+        });
+
+        Ok(Some(float))
+    } else {
+        Ok(None)
     }
 }
 
@@ -75,4 +106,10 @@ pub enum Error {
 
     #[snafu(display("Failed to deserialize the row: {:?}", source))]
     FailedToParse { source: csv::Error },
+
+    #[snafu(display("Wrong format for exposure compensation \"{}\": {:?}", value, source))]
+    ExposureCompensation { source: ParseError, value: String },
+
+    #[snafu(display("The format of the exposure compensation \"{}\" is wrong", value))]
+    InvalidExposureCompensation { value: String }
 }

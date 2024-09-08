@@ -38,6 +38,7 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, mo
         };
 
         exiftool(&args, &exiftool_path)?;
+        debug!("\n");
     }
 
     Ok(())
@@ -72,8 +73,16 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &PathBuf) -> Result<(), Error> {
         .arg(format!("-iso={}", args.exposure.iso))
         .arg(format!("-LensModel={}", args.exposure.lens_name))
         .arg(format!("-Make={}", args.maker))
-        .arg(format!("-Model={}", args.model))
-        .arg(args.file);
+        .arg(format!("-Model={}", args.model));
+
+    let cmd = if let Some(exp_comp) = &args.exposure.exposure_compensation {
+        debug!("Applying exposure compensation as {}", exp_comp);
+        cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp))
+    } else {
+        cmd
+    };
+
+    let cmd = cmd.arg(args.file);
 
     #[cfg(not(target_os = "windows"))]
     let output: Output = {
