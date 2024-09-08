@@ -53,23 +53,14 @@ An example file can be found under the `fixtures/` path.
 ### Requirements
 
 - Rust >= 1.79
-- Perl >= 5
 - Git >= 2.27
 
-### For Windows
+### Installation
 
-Make sure you have [chocolatey](https://chocolatey.org/) and install Perl
+This project requires [`exiftool`](https://exiftool.org/), please run the
+following script to download it locally.
 
-```bat
-choco install strawberryperl
-```
-
-### How To Run
-
-This depends on having [`exiftool`](https://exiftool.org/) installed. The following script will
-download exiftool.
-
-**For Unix Systems**
+**Unix Systems**
 
 ```bash
 ./scripts/unix/install.sh
@@ -79,4 +70,17 @@ download exiftool.
 
 ```bat
 .\scripts\windows\install.bat
+```
+
+### How To Run
+
+Once [`exiftool`](https://exiftool.org/) is installed with the previous script,
+run the CLI with cargo.
+
+```shell
+
+cargo run -- -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --maker <MAKER> -f <FILM_NAME>
+
+# Example
+cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
 ```
