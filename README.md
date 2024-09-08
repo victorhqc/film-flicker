@@ -42,11 +42,26 @@ the CSV rows will match the images chronologically.
 
 The CSV must be as follows
 
-| no | lens_name              | focal_length | date                      | iso | aperture | shutter_speed |
-|----|------------------------|--------------|---------------------------|-----|----------|---------------|
-| 1  | 7Artisans 35mm f/2 MII | 35           | 2024:06:15 15:39:00+02:00 | 200 | 2.8      | 1/60          |
+| no | lens_name              | focal_length | date                      | iso | aperture | shutter_speed | exposure_compensation |
+|----|------------------------|--------------|---------------------------|-----|----------|---------------|-----------------------|
+| 1  | 7Artisans 35mm f/2 MII | 35           | 2024:06:15 15:39:00+02:00 | 200 | 2.8      | 1/60          | 0.67                  |
 
 An example file can be found under the `fixtures/` path.
+
+### Values in metadata.csv
+
+- **no:** This is not required, I like to use it for an easy management in my shots.
+- **lens_name:** String, arbitrary name of your lens.
+- **focal_length:** Integer, the focal length of the lens.
+- **date:** String, note the format, the yyy-mm-dd might be valid, but I'm not sure, please refer to exiftool documentation.
+- **iso:** Integer, ISO of the film (change this if you under or over exposed the film)
+- **aperture:** Float, aperture when the shot was made.
+- **shutter_speed:** String, use the regular format of 1/60 or 2 (for 2 seconds).
+- **exposure_compensation:** String/Float, this is an optional value, it can be left as blank or using any of the following formats:
+  - Positive float numbers: 0.33, 0.67, 1.33, etc.
+  - Negative float numbers: -0.33, -0.67, -1.33, etc.
+  - Positive Fractions: 1/3, 2/3, 1 1/3, etc.
+  - Negative fraction numbers -1/3, -2/3, -1 1/3, etc.
 
 ## Development
 
