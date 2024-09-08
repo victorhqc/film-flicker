@@ -4,9 +4,9 @@ use snafu::prelude::*;
 use std::io::Error as IOError;
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
-use std::path::PathBuf;
 #[cfg(not(target_os = "windows"))]
 use std::path::Path;
+use std::path::PathBuf;
 use std::process::{Command, Output};
 #[cfg(target_os = "windows")]
 use winapi::um::winbase::CREATE_NO_WINDOW;
