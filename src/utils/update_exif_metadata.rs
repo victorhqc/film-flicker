@@ -50,7 +50,7 @@ pub fn update_exif_metadata(
 }
 
 #[cfg(not(target_os = "windows"))]
-pub fn spawn_exiftool(_exiftool_path: &PathBuf) -> Result<Command, Error> {
+pub fn spawn_exiftool(_exiftool_path: &Path) -> Result<Command, Error> {
     let cmd = Command::new("perl");
 
     Ok(cmd)
