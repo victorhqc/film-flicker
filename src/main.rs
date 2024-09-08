@@ -1,13 +1,13 @@
 mod utils;
 
-use std::path::Path;
+use crate::utils::get_photos::get_photos;
+use crate::utils::read_metadata::read_metadata;
+use crate::utils::update_exif_metadata::update_exif_metadata;
 use clap::Parser;
 use dirs::home_dir;
 use dotenv::dotenv;
 use log::debug;
-use crate::utils::get_photos::get_photos;
-use crate::utils::read_metadata::read_metadata;
-use crate::utils::update_exif_metadata::update_exif_metadata;
+use std::path::Path;
 
 fn main() {
     dotenv().ok();

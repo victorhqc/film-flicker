@@ -1,9 +1,9 @@
+use fraction::{error::ParseError, Fraction, ToPrimitive};
 use regex::Regex;
 use serde::Deserialize;
 use snafu::prelude::*;
 use std::path::Path;
 use std::str::FromStr;
-use fraction::{Fraction, ToPrimitive, error::ParseError};
 
 pub fn read_metadata(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
     let mut rdr = csv::Reader::from_path(path).context(InvalidCSVSnafu)?;
@@ -71,16 +71,24 @@ impl ExposureInfo {
     }
 }
 
-fn parse_exposure_compensation(exposure_compensation: &Option<String>) -> Result<Option<f32>, Error> {
+fn parse_exposure_compensation(
+    exposure_compensation: &Option<String>,
+) -> Result<Option<f32>, Error> {
     if let Some(exp_comp) = exposure_compensation {
         // This to allow the format of "1 1/3" or "2 2/3"
         let parts = exp_comp.split(" ").collect::<Vec<&str>>();
         if parts.len() > 2 {
-            return Err(Error::InvalidExposureCompensation { value: exp_comp.clone() })
+            return Err(Error::InvalidExposureCompensation {
+                value: exp_comp.clone(),
+            });
         }
 
         let float: f32 = parts.iter().fold(0.0, |acc, part| {
-            let float = Fraction::from_str(part).context(ExposureCompensationSnafu { value: exp_comp.clone() }).unwrap();
+            let float = Fraction::from_str(part)
+                .context(ExposureCompensationSnafu {
+                    value: exp_comp.clone(),
+                })
+                .unwrap();
             let float: f32 = float.to_f32().unwrap();
 
             if acc >= 0.0 {
@@ -111,5 +119,5 @@ pub enum Error {
     ExposureCompensation { source: ParseError, value: String },
 
     #[snafu(display("The format of the exposure compensation \"{}\" is wrong", value))]
-    InvalidExposureCompensation { value: String }
+    InvalidExposureCompensation { value: String },
 }

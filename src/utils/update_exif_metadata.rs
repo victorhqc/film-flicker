@@ -2,14 +2,19 @@ use crate::utils::read_metadata::ExposureInfo;
 use log::debug;
 use snafu::prelude::*;
 use std::io::Error as IOError;
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 use std::path::PathBuf;
 use std::process::{Command, Output};
 #[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
-#[cfg(target_os = "windows")]
 use winapi::um::winbase::CREATE_NO_WINDOW;
 
-pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, model: &str, maker: &str) -> Result<(), Error> {
+pub fn update_exif_metadata(
+    files: Vec<String>,
+    exposures: Vec<ExposureInfo>,
+    model: &str,
+    maker: &str,
+) -> Result<(), Error> {
     if files.len() != exposures.len() {
         return Err(Error::BadInformation);
     }
@@ -45,8 +50,10 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>, mo
 }
 
 #[cfg(not(target_os = "windows"))]
-pub fn spawn_exiftool(exiftool_path: &PathBuf) -> Result<&mut Command, Error> {
-    Ok(Command::new("perl").arg(exiftool_path))
+pub fn spawn_exiftool(_exiftool_path: &PathBuf) -> Result<Command, Error> {
+    let cmd = Command::new("perl");
+
+    Ok(cmd)
 }
 
 #[cfg(target_os = "windows")]
@@ -59,16 +66,25 @@ pub fn spawn_exiftool(exiftool_path: &PathBuf) -> Result<Command, Error> {
 }
 
 pub fn exiftool(args: &ExifArgs, exiftool_path: &PathBuf) -> Result<(), Error> {
-
     let mut cmd = spawn_exiftool(exiftool_path)?;
 
-    let cmd = cmd.arg(format!("-AllDates={}", args.exposure.date))
+    #[cfg(not(target_os = "windows"))]
+    let cmd = cmd.arg(exiftool_path);
+
+    let cmd = cmd
+        .arg(format!("-AllDates={}", args.exposure.date))
         .arg(format!("-fnumber={}", args.exposure.aperture))
         .arg(format!("-aperturevalue={}", args.exposure.aperture))
         .arg(format!("-FocalLength={}mm", args.exposure.focal_length))
         .arg(format!("-Lens={}mm", args.exposure.focal_length))
-        .arg(format!("-FocalLengthIn35mmFormat={}mm", args.exposure.focal_length))
-        .arg(format!("-ShutterSpeedValue={}", args.exposure.shutter_speed))
+        .arg(format!(
+            "-FocalLengthIn35mmFormat={}mm",
+            args.exposure.focal_length
+        ))
+        .arg(format!(
+            "-ShutterSpeedValue={}",
+            args.exposure.shutter_speed
+        ))
         .arg(format!("-ExposureTime={}", args.exposure.shutter_speed))
         .arg(format!("-iso={}", args.exposure.iso))
         .arg(format!("-LensModel={}", args.exposure.lens_name))
@@ -92,9 +108,7 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &PathBuf) -> Result<(), Error> {
     };
 
     #[cfg(target_os = "windows")]
-    let output: Output = {
-        cmd.output().context(ExiftoolSpawnSnafu)?
-    };
+    let output: Output = { cmd.output().context(ExiftoolSpawnSnafu)? };
 
     if output.status.success() {
         Ok(())
