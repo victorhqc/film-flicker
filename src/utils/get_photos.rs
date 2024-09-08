@@ -60,7 +60,7 @@ fn get_photo_info(path: &PathBuf) -> Result<String, Error> {
     let file_type = metadata.file_type();
 
     if !file_type.is_file() || !is_photo(extension) {
-        return Err(Error::InvalidFile);
+        return Err(Error::InvalidExtension);
     }
 
     if let Some(p) = path.to_str() {
@@ -83,6 +83,9 @@ pub enum Error {
 
     #[snafu(display("File has no extension: {}", entry.display()))]
     NoExtension { entry: PathBuf },
+
+    #[snafu(display("File extension not valid"))]
+    InvalidExtension,
 
     #[snafu(display("File is not valid"))]
     InvalidFile,
