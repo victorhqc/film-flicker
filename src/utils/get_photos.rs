@@ -40,7 +40,7 @@ pub fn get_photos(dir: &Path) -> Result<Vec<String>, Error> {
             }
         })
         // Filter out none values.
-        .filter_map(|p| p)
+        .flatten()
         .collect();
 
     photos.sort();
