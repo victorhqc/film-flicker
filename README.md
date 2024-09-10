@@ -99,3 +99,19 @@ cargo run -- -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --m
 # Example
 cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
 ```
+
+## Build
+
+### Windows
+
+Be sure to have the wix toolchain installed
+
+```bat
+dotnet tool install --global wix
+```
+
+Install cargo-wix for building a `.msi`
+
+```bat
+cargo install cargo-wix
+```
