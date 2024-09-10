@@ -1,5 +1,5 @@
 [package]
-name = "film_exif_fixer"
+name = "photo_scan_metadata"
 version = "0.1.0"
 edition = "2021"
 

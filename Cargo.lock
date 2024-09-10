@@ -186,24 +186,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "film_exif_fixer"
-version = "0.1.0"
-dependencies = [
- "clap",
- "csv",
- "dirs",
- "dotenv",
- "fraction",
- "log",
- "pretty_env_logger",
- "regex",
- "serde",
- "snafu",
- "walkdir",
- "winapi",
-]
-
-[[package]]
 name = "fraction"
 version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -377,6 +359,24 @@ name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
+
+[[package]]
+name = "photo_scan_metadata"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "csv",
+ "dirs",
+ "dotenv",
+ "fraction",
+ "log",
+ "pretty_env_logger",
+ "regex",
+ "serde",
+ "snafu",
+ "walkdir",
+ "winapi",
+]
 
 [[package]]
 name = "pretty_env_logger"
