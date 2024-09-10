@@ -1,4 +1,4 @@
-# Film Exif Fixer
+# Photo Scan Metadata
 
 ## About
 

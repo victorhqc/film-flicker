@@ -4,9 +4,7 @@ use snafu::prelude::*;
 use std::io::Error as IOError;
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
-#[cfg(not(target_os = "windows"))]
 use std::path::Path;
-use std::path::PathBuf;
 use std::process::{Command, Output};
 #[cfg(target_os = "windows")]
 use winapi::um::winbase::CREATE_NO_WINDOW;
@@ -67,7 +65,7 @@ pub fn spawn_exiftool(exiftool_path: &Path) -> Result<Command, Error> {
     Ok(cmd)
 }
 
-pub fn exiftool(args: &ExifArgs, exiftool_path: &PathBuf) -> Result<(), Error> {
+pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     let mut cmd = spawn_exiftool(exiftool_path)?;
 
     #[cfg(not(target_os = "windows"))]
