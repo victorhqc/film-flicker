@@ -104,14 +104,20 @@ cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\202
 
 ### Windows
 
-Be sure to have the wix toolchain installed
+1. Download the wix v3 toolchain from [here](https://github.com/wixtoolset/wix3/releases/tag/wix3141rtm)
 
-```bat
-dotnet tool install --global wix
-```
+   ```bat
+   .\wix314.exe /install /quiet /norestart
+   ```
 
-Install cargo-wix for building a `.msi`
+2. Install cargo-wix for building a `.msi`
 
-```bat
-cargo install cargo-wix
-```
+   ```bat
+   cargo install cargo-wix
+   ```
+
+3. Re-start the terminal and then you can use the cargo wix command
+
+   ```bat
+   cargo wix --install
+   ```
