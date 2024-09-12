@@ -26,7 +26,7 @@ fn main() {
 }
 
 #[derive(Parser, Debug)]
-#[clap(author = "Victor Quiroz Castro", version, about = "Film Exif Fixer")]
+#[clap(author = "Victor Quiroz Castro", version, about = "Film Flicker")]
 struct Args {
     /// Path for the photos
     #[clap(
