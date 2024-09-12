@@ -7,7 +7,6 @@ license = "MIT"
 authors = ["Victor Quiroz"]
 
 [dependencies]
-#cargo-bundle = { version = "0.6.1" }
 clap = { version = "4.5.8", features = ["derive"] }
 csv = "1.3.0"
 directories = "5.0.1"
@@ -27,8 +26,8 @@ snafu = "0.8.3"
 walkdir = "2.5.0"
 zip = { version = "2.2.0" }
 
-[package.metadata.bundle]
-name = "photo_scan_metadata"
-identifier = "com.victorhqc.photo_scan_metadata"
-version = "0.1.0"
-resources = ["./deps/exiftool.zip"]
+#[package.metadata.bundle]
+#name = "photo_scan_metadata"
+#identifier = "com.victorhqc.photo_scan_metadata"
+#version = "0.1.0"
+#resources = ["./deps/exiftool.zip"]
