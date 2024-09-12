@@ -60,7 +60,7 @@
 
     <Product
         Id='*'
-        Name='photo_scan_metadata'
+        Name='Film Flicker'
         UpgradeCode='15DF76CD-F31E-49C1-832B-2DA683D2F091'
         Manufacturer='Victor Quiroz'
         Language='1033'
@@ -83,11 +83,11 @@
             DowngradeErrorMessage='A newer version of [ProductName] is already installed. Setup will now exit.'/>
 
         <Media Id='1' Cabinet='media1.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1'/>
-        <Property Id='DiskPrompt' Value='photo_scan_metadata Installation'/>
+        <Property Id='DiskPrompt' Value='Film Flicker Installation'/>
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
             <Directory Id='$(var.PlatformProgramFilesFolder)' Name='PFiles'>
-                <Directory Id='APPLICATIONFOLDER' Name='photo_scan_metadata'>
+                <Directory Id='APPLICATIONFOLDER' Name='Film Flicker'>
                     <!--
                       Disabling the license sidecar file in the installer is a two step process:
 
@@ -140,9 +140,9 @@
                         <Component Id='binary0' Guid='*'>
                             <File
                                 Id='exe0'
-                                Name='photo_scan_metadata.exe'
+                                Name='film-flicker.exe'
                                 DiskId='1'
-                                Source='$(var.CargoTargetBinDir)\photo_scan_metadata.exe'
+                                Source='$(var.CargoTargetBinDir)\film-flicker.exe'
                                 KeyPath='yes'/>
                         </Component>
                     </Directory>
