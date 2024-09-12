@@ -101,7 +101,31 @@
                             Source='wix\License.rtf'
                             KeyPath='yes'/>
                     </Component>
-                    
+
+                    <Directory Id="DepsFolder" Name="deps">
+                        <Component Id='Zip0' Guid='2DD56AE1-BBE9-4022-8277-D7272E9F6ADB'>
+                            <File Id='exiftoolZip'
+                                Name='exiftool.zip'
+                                Source='deps\exiftool.zip'
+                                KeyPath='yes' />
+                        </Component>
+                      <Directory Id="ExifToolFolder" Name="exiftool" />
+                    </Directory>
+
+                    <Component Id="RemoveAppFolder" Guid="*">
+                        <RemoveFolder Id="RemoveAppDir"
+                            Directory="APPLICATIONFOLDER"
+                            On="uninstall"  />
+
+                        <RegistryValue
+                            Root="HKCU"
+                            Key="Software\[Manufacturer]\[ProductName]"
+                            Name="Installed"
+                            Type="integer"
+                            Value="1"
+                            KeyPath="yes" />
+                    </Component>
+
                     <Directory Id='Bin' Name='bin'>
                         <Component Id='Path' Guid='10D7D132-F421-4023-B262-EBAF854FA50C' KeyPath='yes'>
                             <Environment
@@ -140,8 +164,12 @@
               the license sidecar file from the installer.
             -->
             <ComponentRef Id='License'/>
-            
+
             <ComponentRef Id='binary0'/>
+
+            <ComponentRef Id='Zip0'/>
+
+            <ComponentRef Id='RemoveAppFolder' />
 
             <Feature
                 Id='Environment'
@@ -153,9 +181,27 @@
             </Feature>
         </Feature>
 
+        <CustomAction Id="ExtractExiftoolZipArchive"
+            Directory="DepsFolder"
+            ExeCommand="powershell.exe -Command Expand-Archive -Path 'exiftool.zip' -DestinationPath '[APPLICATIONFOLDER]\deps\exiftool' -Force"
+            Execute="deferred"
+            Impersonate="no"
+            Return="check" />
+
+        <CustomAction Id="RemoveAllFiles"
+             Directory="APPLICATIONFOLDER"
+             ExeCommand="powershell.exe -Command Remove-Item -Recurse -Force '[APPLICATIONFOLDER]\*'"
+             Execute="deferred"
+             Impersonate="no"
+             Return="check" />
+
+        <InstallExecuteSequence>
+          <Custom Action="ExtractExiftoolZipArchive" After="InstallFiles">NOT Installed</Custom>
+          <Custom Action="RemoveAllFiles" Before="RemoveFiles">REMOVE="ALL"</Custom>
+        </InstallExecuteSequence>
+
         <SetProperty Id='ARPINSTALLLOCATION' Value='[APPLICATIONFOLDER]' After='CostFinalize'/>
 
-        
         <!--
           Uncomment the following `Icon` and `Property` tags to change the product icon.
 
@@ -165,7 +211,7 @@
         <!--<Icon Id='ProductICO' SourceFile='wix\Product.ico'/>-->
         <!--<Property Id='ARPPRODUCTICON' Value='ProductICO' />-->
 
-        
+
         <!--
           Adding a URL to Add/Remove Programs control panel listing for the
           application is a two step process:
@@ -188,7 +234,7 @@
             -->
             <!--<Publish Dialog='WelcomeDlg' Control='Next' Event='NewDialog' Value='CustomizeDlg' Order='99'>1</Publish>-->
             <!--<Publish Dialog='CustomizeDlg' Control='Back' Event='NewDialog' Value='WelcomeDlg' Order='99'>1</Publish>-->
-            
+
         </UI>
 
         <!--
@@ -196,8 +242,8 @@
           or removing the following `WixVariable` tag
         -->
         <WixVariable Id='WixUILicenseRtf' Value='wix\License.rtf'/>
-        
-        
+
+
         <!--
           Uncomment the next `WixVariable` tag to customize the installer's
           Graphical User Interface (GUI) and add a custom banner image across
@@ -208,7 +254,7 @@
         -->
         <!--<WixVariable Id='WixUIBannerBmp' Value='wix\Banner.bmp'/>-->
 
-        
+
         <!--
           Uncomment the next `WixVariable` tag to customize the installer's
           Graphical User Interface (GUI) and add a custom image to the first
