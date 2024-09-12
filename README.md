@@ -1,5 +1,7 @@
 # Film Flicker
 
+![Logo](img/logo.png)
+
 ## About
 
 When scanning film negatives, the metadata of the exposures does not match.
