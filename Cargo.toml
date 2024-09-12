@@ -1,5 +1,5 @@
 [package]
-name = "photo_scan_metadata"
+name = "film-flicker"
 version = "0.1.0"
 edition = "2021"
 
