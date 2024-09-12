@@ -1,6 +1,6 @@
 # Film Flicker
 
-![Logo](img/logo.png)
+![Logo](img/logo.png){:height="150px" width="150px"}
 
 ## About
 
