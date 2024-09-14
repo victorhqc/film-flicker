@@ -122,4 +122,7 @@ cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\202
 
    ```bat
    cargo wix --install
+   
+   # Or to debug for errors
+   cargo wix --install --nocapture
    ```
