@@ -59,7 +59,7 @@ pub fn update_exif_metadata(
         trace!("\n");
         pb.inc(1);
     }
-    
+
     pb.finish();
     println!("\n");
 
