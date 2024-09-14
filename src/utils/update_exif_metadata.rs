@@ -119,7 +119,9 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 
     #[cfg(not(target_os = "windows"))]
     let output: Output = {
-        let child = cmd.spawn().context(ExiftoolSpawnSnafu)?;
+        let child = cmd.spawn().context(ExiftoolSpawnSnafu {
+            path: format!("{}", exiftool_path.display()),
+        })?;
 
         child.wait_with_output().context(ExiftoolWaitSnafu)?
     };
