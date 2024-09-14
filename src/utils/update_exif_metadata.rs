@@ -1,6 +1,8 @@
 use super::paths::{project_root, Error as PathError};
 use crate::utils::read_metadata::ExposureInfo;
-use log::debug;
+use console::Emoji;
+use indicatif::ProgressBar;
+use log::{debug, trace};
 use snafu::prelude::*;
 use std::io::Error as IOError;
 #[cfg(target_os = "windows")]
@@ -9,6 +11,9 @@ use std::path::Path;
 use std::process::{Command, Output};
 #[cfg(target_os = "windows")]
 use winapi::um::winbase::CREATE_NO_WINDOW;
+
+static CAMERA: Emoji<'_, '_> = Emoji("📷 ", "");
+static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 
 pub fn update_exif_metadata(
     files: Vec<String>,
@@ -30,11 +35,18 @@ pub fn update_exif_metadata(
 
     debug!("Exiftool Dir {:?}", exiftool_path);
 
+    println!("\n");
+    println!("{}Processing {} Photos...", FILM, files.len());
+    println!("{}Camera: {} {}", CAMERA, maker, model);
+    println!("\n");
+
+    let pb = ProgressBar::new(files.len() as u64);
+
     for (index, file) in files.iter().enumerate() {
         let exposure = exposures.get(index).unwrap();
 
-        debug!("File: {}", file);
-        debug!("Exposure: {:?}", exposure);
+        trace!("File: {}", file);
+        trace!("Exposure: {:?}", exposure);
 
         let args = ExifArgs {
             file,
@@ -44,8 +56,11 @@ pub fn update_exif_metadata(
         };
 
         exiftool(&args, &exiftool_path)?;
-        debug!("\n");
+        trace!("\n");
+        pb.inc(1);
     }
+
+    pb.finish();
 
     Ok(())
 }
@@ -93,7 +108,7 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
         .arg(format!("-Model={}", args.model));
 
     let cmd = if let Some(exp_comp) = &args.exposure.exposure_compensation {
-        debug!("Applying exposure compensation as {}", exp_comp);
+        trace!("Applying exposure compensation as {}", exp_comp);
         cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp))
     } else {
         cmd
