@@ -23,7 +23,7 @@ pub fn project_root() -> Result<PathBuf, Error> {
         Ok(path)
     }
 
-    #[cfg(all(not(target_os="windows"), not(debug_assertions)))]
+    #[cfg(all(not(target_os = "windows"), not(debug_assertions)))]
     unimplemented!()
 }
 
