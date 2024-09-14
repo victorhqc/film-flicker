@@ -42,7 +42,7 @@ where
 
     for entry in it {
         let path = entry.path();
-        let name = path.strip_prefix(&src).unwrap();
+        let name = path.strip_prefix(src).unwrap();
         let path_string = name.to_str().map(str::to_owned).context(BadPathSnafu {
             path: format!("{:?}", name),
         })?;
