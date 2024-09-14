@@ -1,5 +1,7 @@
 # Film Flicker
 
+<img src="./img/logo.png" height="150" />
+
 ## About
 
 When scanning film negatives, the metadata of the exposures does not match.
@@ -99,3 +101,28 @@ cargo run -- -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --m
 # Example
 cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
 ```
+
+## Build
+
+### Windows
+
+1. Download the wix v3 toolchain from [here](https://github.com/wixtoolset/wix3/releases/tag/wix3141rtm)
+
+   ```bat
+   .\wix314.exe /install /quiet /norestart
+   ```
+
+2. Install cargo-wix for building a `.msi`
+
+   ```bat
+   cargo install cargo-wix
+   ```
+
+3. Re-start the terminal and then you can use the cargo wix command
+
+   ```bat
+   cargo wix --install
+   
+   # Or to debug for errors
+   cargo wix --install --nocapture
+   ```
