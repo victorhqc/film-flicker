@@ -4,22 +4,21 @@
 
 ## About
 
-When scanning film negatives, the metadata of the exposures does not match.
-This tool fixes that by replacing the EXIF metadata of the scans with its
-correct values. It requires a CSV file with the information of each shot
-to work.
+When scanning film negatives, the metadata of the scans does not match with
+the settings of the exposure of the film. This tool fixes that by replacing the
+EXIF metadata of the scans with the correct information.
 
 ## How I use it
 
-Whenever I go out to shoot film, I take a picture with my phone of my camera
-settings—that is, shutter speed and aperture. Then, at home, I write the
-information in a spreadsheet. I note the date and time, ISO, shutter speed,
-and aperture.
+Whenever I go out to shoot film, as soon as I shot any picture with my camera,
+I take an additional photo with my phone towards my film camera so the settings
+are visible, i.e. Shutter Speed & Aperture. Then, at home after the shooting
+is done. I write the  information in a spreadsheet, making sure I write down
+the time of the shot and other information like ISO of the film, camera, lens,
+etc.
 
-This information I use to correct the scans' EXIF metadata. When scanning, each
-photo's EXIF metadata is from the digital camera, not the film. This script
-replaces the key parts. The exposure information, focal length, and the camera
-and lens names.
+Using the spreadsheet as a CSV File, it is possible to replace the values from
+the scan with the values in the CSV File.
 
 ## How to use
 
@@ -105,6 +104,9 @@ cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\202
 ## Build
 
 ### Windows
+
+Windows is able to build and install as a regular program. No need to run it
+in development mode.
 
 1. Download the wix v3 toolchain from [here](https://github.com/wixtoolset/wix3/releases/tag/wix3141rtm)
 
