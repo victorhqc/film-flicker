@@ -1,3 +1,4 @@
+use super::paths::{project_root, Error as PathError};
 use crate::utils::read_metadata::ExposureInfo;
 use log::debug;
 use snafu::prelude::*;
@@ -19,13 +20,13 @@ pub fn update_exif_metadata(
         return Err(Error::BadInformation);
     }
 
-    let path = std::env::current_dir().unwrap();
+    let root = project_root().context(PathSnafu)?;
 
     #[cfg(target_os = "windows")]
-    let exiftool_path = path.join("deps").join("exiftool").join("exiftool(-k).exe");
+    let exiftool_path = root.join("deps").join("exiftool").join("exiftool(-k).exe");
 
     #[cfg(not(target_os = "windows"))]
-    let exiftool_path = path.join("deps").join("exiftool").join("exiftool");
+    let exiftool_path = root.join("deps").join("exiftool").join("exiftool");
 
     debug!("Exiftool Dir {:?}", exiftool_path);
 
@@ -108,7 +109,11 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     };
 
     #[cfg(target_os = "windows")]
-    let output: Output = { cmd.output().context(ExiftoolSpawnSnafu)? };
+    let output: Output = {
+        cmd.output().context(ExiftoolSpawnSnafu {
+            path: format!("{}", exiftool_path.display()),
+        })?
+    };
 
     if output.status.success() {
         Ok(())
@@ -133,13 +138,16 @@ pub enum Error {
     #[snafu(display("The amount of images do not match the number of exposures"))]
     BadInformation,
 
-    #[snafu(display("Failed to run exiftool: {:?}", source))]
-    ExiftoolSpawn { source: IOError },
+    #[snafu(display("Failed to run exiftool \"{}\": {:?}", path, source))]
+    ExiftoolSpawn { source: IOError, path: String },
 
     #[cfg(not(target_os = "windows"))]
     #[snafu(display("Failed to get run exiftool: {:?}", source))]
     ExiftoolWait { source: IOError },
 
-    #[snafu(display("Failed to run exiftool"))]
+    #[snafu(display("Failed to run exiftool: {:?}", stderr))]
     ExiftoolExe { stderr: String },
+
+    #[snafu(display("Failed to get path for exiftool: {:?}", source))]
+    Path { source: PathError },
 }
