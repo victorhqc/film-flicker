@@ -92,7 +92,7 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     let mut cmd = cmd.arg(exiftool_path);
 
     #[cfg(target_os = "windows")]
-    let mut cmd = cmd.arg(format!(""));
+    let mut cmd = cmd.arg(String::new());
 
     if let Some(date) = &args.exposure.date {
         cmd = cmd.arg(format!("-AllDates={}", date));
