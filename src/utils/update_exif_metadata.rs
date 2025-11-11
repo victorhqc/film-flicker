@@ -91,6 +91,9 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     #[cfg(not(target_os = "windows"))]
     let mut cmd = cmd.arg(exiftool_path);
 
+    #[cfg(target_os = "windows")]
+    let mut cmd = cmd.arg(format!(""));
+
     if let Some(date) = &args.exposure.date {
         cmd = cmd.arg(format!("-AllDates={}", date));
     }
