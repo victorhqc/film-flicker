@@ -22,7 +22,18 @@ fn main() {
     let photo_paths = get_photos(source_path).unwrap();
     let exposures = read_metadata(metadata_path).unwrap();
 
-    update_exif_metadata(photo_paths, exposures, &args.camera, &args.maker).unwrap();
+    let model = args.camera.as_deref();
+    let maker = args.maker.as_deref();
+
+    let result = update_exif_metadata(photo_paths, exposures, model, maker);
+    match result {
+        Ok(_) => debug!("Done"),
+        Err(err) => {
+            eprintln!("{}", err);
+
+            panic!();
+        }
+    }
 }
 
 #[derive(Parser, Debug)]
@@ -40,13 +51,13 @@ struct Args {
 
     /// Name of the camera
     #[clap(short, long)]
-    camera: String,
+    camera: Option<String>,
 
     /// Example: KONICA, NIKON, CANON
     #[clap(short = 'k', long)]
-    maker: String,
+    maker: Option<String>,
 
     /// Name of the film
     #[clap(short, long)]
-    film: String,
+    film: Option<String>,
 }

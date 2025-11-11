@@ -21,32 +21,34 @@ pub fn read_metadata(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
 
 #[derive(Debug)]
 pub struct ExposureInfo {
-    pub lens_name: String,
-    pub focal_length: f32,
-    pub date: String,
-    pub iso: i32,
-    pub aperture: f32,
-    pub shutter_speed: String,
+    pub lens_name: Option<String>,
+    pub focal_length: Option<f32>,
+    pub date: Option<String>,
+    pub iso: Option<i32>,
+    pub aperture: Option<f32>,
+    pub shutter_speed: Option<String>,
     pub exposure_compensation: Option<f32>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct BuildExposureInfo {
-    lens_name: String,
-    focal_length: f32,
-    date: String,
-    iso: i32,
-    aperture: f32,
-    shutter_speed: String,
+    lens_name: Option<String>,
+    focal_length: Option<f32>,
+    date: Option<String>,
+    iso: Option<i32>,
+    aperture: Option<f32>,
+    shutter_speed: Option<String>,
     exposure_compensation: Option<String>,
 }
 
 impl ExposureInfo {
     pub fn build(args: BuildExposureInfo) -> Result<ExposureInfo, Error> {
-        if !Self::is_shutter_speed_valid(&args.shutter_speed) {
-            return Err(Error::InvalidShutterSpeed {
-                text: args.shutter_speed.to_string(),
-            });
+        if let Some(shutter_speed) = &args.shutter_speed {
+            if !Self::is_shutter_speed_valid(shutter_speed) {
+                return Err(Error::InvalidShutterSpeed {
+                    text: shutter_speed.to_string(),
+                });
+            }
         }
 
         let exp_comp = parse_exposure_compensation(&args.exposure_compensation)?;

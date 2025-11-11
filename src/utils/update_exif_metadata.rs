@@ -18,11 +18,14 @@ static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 pub fn update_exif_metadata(
     files: Vec<String>,
     exposures: Vec<ExposureInfo>,
-    model: &str,
-    maker: &str,
+    model: Option<&str>,
+    maker: Option<&str>,
 ) -> Result<(), Error> {
     if files.len() != exposures.len() {
-        return Err(Error::BadInformation);
+        return Err(Error::BadInformation {
+            photos: files.len(),
+            exposures: exposures.len(),
+        });
     }
 
     let root = project_root().context(PathSnafu)?;
@@ -37,7 +40,7 @@ pub fn update_exif_metadata(
 
     println!("\n");
     println!("{}Processing {} Photos...", FILM, files.len());
-    println!("{}Camera: {} {}", CAMERA, maker, model);
+    println!("{}Camera: {:?} {:?}", CAMERA, maker, model);
     println!("\n");
 
     let pb = ProgressBar::new(files.len() as u64);
@@ -86,34 +89,54 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     let mut cmd = spawn_exiftool(exiftool_path)?;
 
     #[cfg(not(target_os = "windows"))]
-    let cmd = cmd.arg(exiftool_path);
+    let mut cmd = cmd.arg(exiftool_path);
 
-    let cmd = cmd
-        .arg(format!("-AllDates={}", args.exposure.date))
-        .arg(format!("-fnumber={}", args.exposure.aperture))
-        .arg(format!("-aperturevalue={}", args.exposure.aperture))
-        .arg(format!("-FocalLength={}mm", args.exposure.focal_length))
-        .arg(format!("-Lens={}mm", args.exposure.focal_length))
-        .arg(format!(
-            "-FocalLengthIn35mmFormat={}mm",
-            args.exposure.focal_length
-        ))
-        .arg(format!(
-            "-ShutterSpeedValue={}",
-            args.exposure.shutter_speed
-        ))
-        .arg(format!("-ExposureTime={}", args.exposure.shutter_speed))
-        .arg(format!("-iso={}", args.exposure.iso))
-        .arg(format!("-LensModel={}", args.exposure.lens_name))
-        .arg(format!("-Make={}", args.maker))
-        .arg(format!("-Model={}", args.model));
+    #[cfg(target_os = "windows")]
+    let mut cmd = &mut cmd;
 
-    let cmd = if let Some(exp_comp) = &args.exposure.exposure_compensation {
+    if let Some(date) = &args.exposure.date {
+        cmd = cmd.arg(format!("-AllDates={}", date));
+    }
+
+    if let Some(aperture) = args.exposure.aperture {
+        cmd = cmd
+            .arg(format!("-fnumber={}", aperture))
+            .arg(format!("-aperturevalue={}", aperture));
+    }
+
+    if let Some(focal_length) = args.exposure.focal_length {
+        cmd = cmd
+            .arg(format!("-FocalLength={}mm", focal_length))
+            .arg(format!("-Lens={}mm", focal_length))
+            .arg(format!("-FocalLengthIn35mmFormat={}mm", focal_length));
+    }
+
+    if let Some(shutter_speed) = &args.exposure.shutter_speed {
+        cmd = cmd
+            .arg(format!("-ShutterSpeedValue={}", shutter_speed))
+            .arg(format!("-ExposureTime={}", shutter_speed));
+    }
+
+    if let Some(iso) = args.exposure.iso {
+        cmd = cmd.arg(format!("-iso={}", iso));
+    }
+
+    if let Some(lens_name) = &args.exposure.lens_name {
+        cmd = cmd.arg(format!("-LensModel={}", lens_name));
+    }
+
+    if let Some(maker) = args.maker {
+        cmd = cmd.arg(format!("-Make={}", maker));
+    }
+
+    if let Some(model) = args.model {
+        cmd = cmd.arg(format!("-Model={}", model));
+    }
+
+    if let Some(exp_comp) = args.exposure.exposure_compensation {
         trace!("Applying exposure compensation as {}", exp_comp);
-        cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp))
-    } else {
-        cmd
-    };
+        cmd = cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp));
+    }
 
     let cmd = cmd.arg(args.file);
 
@@ -147,14 +170,14 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 pub struct ExifArgs<'a> {
     file: &'a str,
     exposure: &'a ExposureInfo,
-    model: &'a str,
-    maker: &'a str,
+    model: Option<&'a str>,
+    maker: Option<&'a str>,
 }
 
 #[derive(Debug, Snafu)]
 pub enum Error {
-    #[snafu(display("The amount of images do not match the number of exposures"))]
-    BadInformation,
+    #[snafu(display("The amount of images do not match the number of exposures, photos found: {}, exposures in metadata: {}", photos, exposures))]
+    BadInformation { photos: usize, exposures: usize },
 
     #[snafu(display("Failed to run exiftool \"{}\": {:?}", path, source))]
     ExiftoolSpawn { source: IOError, path: String },
