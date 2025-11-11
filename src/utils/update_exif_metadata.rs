@@ -125,6 +125,10 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
         cmd = cmd.arg(format!("-LensModel={}", lens_name));
     }
 
+    if let Some(lens_maker) = &args.exposure.lens_maker {
+        cmd = cmd.arg(format!("-LensMake={}", lens_maker));
+    }
+
     if let Some(maker) = args.maker {
         cmd = cmd.arg(format!("-Make={}", maker));
     }
