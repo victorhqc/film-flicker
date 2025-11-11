@@ -22,6 +22,7 @@ pub fn read_metadata(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
 #[derive(Debug)]
 pub struct ExposureInfo {
     pub lens_name: Option<String>,
+    pub lens_maker: Option<String>,
     pub focal_length: Option<f32>,
     pub date: Option<String>,
     pub iso: Option<i32>,
@@ -33,6 +34,7 @@ pub struct ExposureInfo {
 #[derive(Debug, Deserialize)]
 pub struct BuildExposureInfo {
     lens_name: Option<String>,
+    lens_maker: Option<String>,
     focal_length: Option<f32>,
     date: Option<String>,
     iso: Option<i32>,
@@ -55,6 +57,7 @@ impl ExposureInfo {
 
         let result = ExposureInfo {
             lens_name: args.lens_name,
+            lens_maker: args.lens_maker,
             date: args.date,
             iso: args.iso,
             focal_length: args.focal_length,
