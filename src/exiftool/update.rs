@@ -6,12 +6,8 @@ use indicatif::ProgressBar;
 use log::{debug, trace};
 use snafu::prelude::*;
 use std::io::Error as IOError;
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
 use std::path::Path;
 use std::process::Output;
-#[cfg(target_os = "windows")]
-use winapi::um::winbase::CREATE_NO_WINDOW;
 
 static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 
