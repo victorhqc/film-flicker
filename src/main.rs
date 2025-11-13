@@ -1,5 +1,6 @@
 mod csv;
 mod exiftool;
+mod exposure_info;
 mod photos;
 mod utils;
 

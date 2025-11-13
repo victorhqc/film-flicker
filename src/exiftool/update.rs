@@ -1,6 +1,6 @@
 use super::spawn::spawn_exiftool;
-use crate::csv::ExposureInfo;
-use crate::utils::paths::{project_root, Error as PathError};
+use crate::exposure_info::ExposureInfo;
+use crate::utils::paths::{project_root, PathsError};
 use console::Emoji;
 use indicatif::ProgressBar;
 use log::{debug, trace};
@@ -21,9 +21,9 @@ pub fn update_exif_metadata(
     exposures: Vec<ExposureInfo>,
     model: Option<&str>,
     maker: Option<&str>,
-) -> Result<(), UpdateError> {
+) -> Result<(), Error> {
     if files.len() != exposures.len() {
-        return Err(UpdateError::BadInformation {
+        return Err(Error::BadInformation {
             photos: files.len(),
             exposures: exposures.len(),
         });
@@ -70,7 +70,7 @@ pub fn update_exif_metadata(
     Ok(())
 }
 
-fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), UpdateError> {
+fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     let mut cmd = spawn_exiftool(exiftool_path);
 
     #[cfg(not(target_os = "windows"))]
@@ -150,7 +150,7 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), UpdateError> {
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
 
-        Err(UpdateError::ExiftoolExe {
+        Err(Error::ExiftoolExe {
             stderr: stderr.to_string(),
         })
     }
@@ -162,6 +162,8 @@ pub struct ExifArgs<'a> {
     model: Option<&'a str>,
     maker: Option<&'a str>,
 }
+
+type Error = UpdateError;
 
 #[derive(Debug, Snafu)]
 pub enum UpdateError {
@@ -179,5 +181,5 @@ pub enum UpdateError {
     ExiftoolExe { stderr: String },
 
     #[snafu(display("Failed to get path for exiftool: {:?}", source))]
-    Path { source: PathError },
+    Path { source: PathsError },
 }

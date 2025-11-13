@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 use walkdir::WalkDir;
 
-pub fn get_paths(dir: &Path) -> Result<Vec<String>, PathError> {
+pub fn get_paths(dir: &Path) -> Result<Vec<String>, Error> {
     if dir.is_file() {
         let info = get_path(&dir.to_path_buf())?;
         return Ok(vec![info]);
@@ -48,7 +48,7 @@ pub fn get_paths(dir: &Path) -> Result<Vec<String>, PathError> {
     Ok(photos)
 }
 
-fn get_path(path: &PathBuf) -> Result<String, PathError> {
+fn get_path(path: &PathBuf) -> Result<String, Error> {
     let metadata = fs::metadata(path).context(MetadataSnafu)?;
 
     let extension = path
@@ -60,14 +60,14 @@ fn get_path(path: &PathBuf) -> Result<String, PathError> {
     let file_type = metadata.file_type();
 
     if !file_type.is_file() || !is_photo(extension) {
-        return Err(PathError::InvalidExtension);
+        return Err(Error::InvalidExtension);
     }
 
     if let Some(p) = path.to_str() {
         return Ok(p.to_string());
     }
 
-    Err(PathError::InvalidFile)
+    Err(Error::InvalidFile)
 }
 
 fn is_photo(extension: &str) -> bool {
@@ -76,8 +76,10 @@ fn is_photo(extension: &str) -> bool {
         | "png")
 }
 
+type Error = PathsError;
+
 #[derive(Debug, Snafu)]
-pub enum PathError {
+pub enum PathsError {
     #[snafu(display("Failed to read metadata: {}", source))]
     Metadata { source: io::Error },
 
