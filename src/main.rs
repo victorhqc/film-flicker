@@ -3,7 +3,7 @@ mod utils;
 use crate::utils::get_photos::get_photos;
 use crate::utils::read_metadata::read_metadata;
 use crate::utils::update_exif_metadata::update_exif_metadata;
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use dirs::home_dir;
 use dotenv::dotenv;
 use log::debug;
@@ -16,6 +16,14 @@ fn main() {
     let args = Args::parse();
     debug!("Arguments: {:?}", args);
 
+    match args.command {
+        Commands::ExifApply(args) => {
+            handle_exif_apply(args);
+        }
+    }
+}
+
+fn handle_exif_apply(args: ExifApplyArgs) {
     let source_path = Path::new(&args.source);
     let metadata_path = Path::new(&args.metadata);
 
@@ -39,6 +47,18 @@ fn main() {
 #[derive(Parser, Debug)]
 #[clap(author = "Victor Quiroz Castro", version, about = "Film Flicker")]
 struct Args {
+    #[clap(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    /// Applies EXIF Metadata to photos based on a CSV File
+    ExifApply(ExifApplyArgs),
+}
+
+#[derive(Parser, Debug)]
+struct ExifApplyArgs {
     /// Path for the photos
     #[clap(
         short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap()
