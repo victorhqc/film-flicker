@@ -27,8 +27,10 @@ pub fn project_root() -> Result<PathBuf, Error> {
     unimplemented!()
 }
 
+type Error = PathsError;
+
 #[derive(Debug, Snafu)]
-pub enum Error {
+pub enum PathsError {
     #[snafu(display("Failed to get current dir: {:?}", source))]
     CurrentDir { source: std::io::Error },
 

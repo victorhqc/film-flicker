@@ -2,25 +2,12 @@ use fraction::{error::ParseError, Fraction, ToPrimitive};
 use regex::Regex;
 use serde::Deserialize;
 use snafu::prelude::*;
-use std::path::Path;
 use std::str::FromStr;
-
-pub fn read_metadata(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
-    let mut rdr = csv::Reader::from_path(path).context(InvalidCSVSnafu)?;
-
-    let mut res = Vec::new();
-    for exp in rdr.deserialize() {
-        let args: BuildExposureInfo = exp.context(FailedToParseSnafu)?;
-        let exposure = ExposureInfo::build(args)?;
-
-        res.push(exposure);
-    }
-
-    Ok(res)
-}
 
 #[derive(Debug)]
 pub struct ExposureInfo {
+    pub camera_name: Option<String>,
+    pub camera_maker: Option<String>,
     pub lens_name: Option<String>,
     pub lens_maker: Option<String>,
     pub focal_length: Option<f32>,
@@ -33,6 +20,8 @@ pub struct ExposureInfo {
 
 #[derive(Debug, Deserialize)]
 pub struct BuildExposureInfo {
+    camera_name: Option<String>,
+    camera_maker: Option<String>,
     lens_name: Option<String>,
     lens_maker: Option<String>,
     focal_length: Option<f32>,
@@ -56,6 +45,8 @@ impl ExposureInfo {
         let exp_comp = parse_exposure_compensation(&args.exposure_compensation)?;
 
         let result = ExposureInfo {
+            camera_name: args.camera_name,
+            camera_maker: args.camera_maker,
             lens_name: args.lens_name,
             lens_maker: args.lens_maker,
             date: args.date,
@@ -109,16 +100,12 @@ fn parse_exposure_compensation(
     }
 }
 
+type Error = ExposureError;
+
 #[derive(Debug, Snafu)]
-pub enum Error {
+pub enum ExposureError {
     #[snafu(display("The Shutter speed is incorrect: {} does not follow the pattern", text))]
     InvalidShutterSpeed { text: String },
-
-    #[snafu(display("Failed to read CSV: {:?}", source))]
-    InvalidCSV { source: csv::Error },
-
-    #[snafu(display("Failed to deserialize the row: {:?}", source))]
-    FailedToParse { source: csv::Error },
 
     #[snafu(display("Wrong format for exposure compensation \"{}\": {:?}", value, source))]
     ExposureCompensation { source: ParseError, value: String },
