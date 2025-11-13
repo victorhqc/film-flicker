@@ -6,6 +6,8 @@ use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct ExposureInfo {
+    pub camera_name: Option<String>,
+    pub camera_maker: Option<String>,
     pub lens_name: Option<String>,
     pub lens_maker: Option<String>,
     pub focal_length: Option<f32>,
@@ -18,6 +20,8 @@ pub struct ExposureInfo {
 
 #[derive(Debug, Deserialize)]
 pub struct BuildExposureInfo {
+    camera_name: Option<String>,
+    camera_maker: Option<String>,
     lens_name: Option<String>,
     lens_maker: Option<String>,
     focal_length: Option<f32>,
@@ -41,6 +45,8 @@ impl ExposureInfo {
         let exp_comp = parse_exposure_compensation(&args.exposure_compensation)?;
 
         let result = ExposureInfo {
+            camera_name: args.camera_name,
+            camera_maker: args.camera_maker,
             lens_name: args.lens_name,
             lens_maker: args.lens_maker,
             date: args.date,

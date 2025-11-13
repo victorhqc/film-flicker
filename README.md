@@ -36,16 +36,18 @@ directory. Images must be sortable by name (e.g., "1.jpg, 2.jpg..." or
 
 The CSV format:
 
-| no  | lens_maker  | lens_name               | focal_length | date                      | iso | aperture | shutter_speed | exposure_compensation |
-| --- | ----------- | ----------------------- | ------------ | ------------------------- | --- | -------- | ------------- | --------------------- |
-| 1   | VOIGTLANDER | NOKTON 35mm F1.5        | 35           | 2024:06:15 15:39:00+02:00 | 200 | 2.8      | 1/60          | 0.67                  |
-| 2   | LEICA       | APO SUMMICRON 50mm F2.0 | 50           | 2024:06:15 15:52:00+02:00 | 200 | 4.0      | 1/60          | 0                     |
+| no  | camera_maker | camera_name | lens_maker  | lens_name               | focal_length | date                      | iso | aperture | shutter_speed | exposure_compensation |
+| --- | ------------ | ----------- | ----------- | ----------------------- | ------------ | ------------------------- | --- | -------- | ------------- | --------------------- |
+| 1   | LEICA        | M6          | VOIGTLANDER | NOKTON 35mm F1.5        | 35           | 2024:06:15 15:39:00+02:00 | 200 | 2.8      | 1/60          | 0.67                  |
+| 2   | LEICA        | M6          | LEICA       | APO SUMMICRON 50mm F2.0 | 50           | 2024:06:15 15:52:00+02:00 | 200 | 4.0      | 1/60          | 0                     |
 
 An example file is in the `fixtures/` directory.
 
 ### Values in metadata.csv
 
 - **no:** Optional. For tracking shots.
+- **camera_maker:** String. Camera maker.
+- **camera_name:** String. Camera name.
 - **lens_maker:** String. Lens maker.
 - **lens_name:** String. Lens name.
 - **focal_length:** Integer. Lens focal length.

@@ -13,15 +13,9 @@ use std::process::Output;
 #[cfg(target_os = "windows")]
 use winapi::um::winbase::CREATE_NO_WINDOW;
 
-static CAMERA: Emoji<'_, '_> = Emoji("📷 ", "");
 static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 
-pub fn update_exif_metadata(
-    files: Vec<String>,
-    exposures: Vec<ExposureInfo>,
-    model: Option<&str>,
-    maker: Option<&str>,
-) -> Result<(), Error> {
+pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>) -> Result<(), Error> {
     if files.len() != exposures.len() {
         return Err(Error::BadInformation {
             photos: files.len(),
@@ -41,7 +35,6 @@ pub fn update_exif_metadata(
 
     println!("\n");
     println!("{}Processing {} Photos...", FILM, files.len());
-    println!("{}Camera: {:?} {:?}", CAMERA, maker, model);
     println!("\n");
 
     let pb = ProgressBar::new(files.len() as u64);
@@ -52,12 +45,7 @@ pub fn update_exif_metadata(
         trace!("File: {}", file);
         trace!("Exposure: {:?}", exposure);
 
-        let args = ExifArgs {
-            file,
-            model,
-            exposure,
-            maker,
-        };
+        let args = ExifArgs { file, exposure };
 
         exiftool(&args, &exiftool_path)?;
         trace!("\n");
@@ -114,11 +102,11 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
         cmd = cmd.arg(format!("-LensMake={}", lens_maker));
     }
 
-    if let Some(maker) = args.maker {
+    if let Some(maker) = &args.exposure.camera_maker {
         cmd = cmd.arg(format!("-Make={}", maker));
     }
 
-    if let Some(model) = args.model {
+    if let Some(model) = &args.exposure.camera_name {
         cmd = cmd.arg(format!("-Model={}", model));
     }
 
@@ -159,8 +147,6 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 pub struct ExifArgs<'a> {
     file: &'a str,
     exposure: &'a ExposureInfo,
-    model: Option<&'a str>,
-    maker: Option<&'a str>,
 }
 
 type Error = UpdateError;
