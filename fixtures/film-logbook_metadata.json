@@ -1,0 +1,81 @@
+{
+  "name": "Example",
+  "speed": "400",
+  "end": "2025-10-23T18:00:00+0200",
+  "imagecount": 0,
+  "notes": "",
+  "film": "Kodak Portra 400 ",
+  "start": "2025-10-23T18:00:00+0200",
+  "pictures": [
+    {
+      "frame_number": 1,
+      "tags": [],
+      "image_reference_uuid": "CB04C966-E92C-4068-AB20-64CED0EED0A6",
+      "camera": {
+        "notes": "",
+        "name": "Leica M6",
+        "mount": "M",
+        "format": "135",
+        "megapixel": 0
+      },
+      "shutterspeed": "1\/160",
+      "time": "2025-10-23T09:24:00+0200",
+      "accessories": [],
+      "notes": "",
+      "camera_name": "Leica M6",
+      "lens": {
+        "mount": "VM",
+        "max_focal_length": 0,
+        "prime": "true",
+        "focal_length": 50,
+        "notes": "",
+        "min_focal_length": -1,
+        "max_aperture": "f\/22",
+        "name": "APO Lanthar 50mm",
+        "min_aperture": "f\/2.0"
+      },
+      "lightmeter_reading": "0",
+      "location": "52.522104089586215;13.410379613009749",
+      "exposure_compensation": "0",
+      "aperture": "f\/5.6",
+      "focal_length": "50mm",
+      "additional_exposures": [],
+      "speed": "400"
+    },
+    {
+      "camera": {
+        "mount": "M",
+        "notes": "",
+        "name": "Leica M6",
+        "megapixel": 0,
+        "format": "135"
+      },
+      "location": "52.522104089586215;13.410379613009749",
+      "exposure_compensation": "0",
+      "camera_name": "Leica M6",
+      "notes": "",
+      "lightmeter_reading": "0",
+      "additional_exposures": [],
+      "focal_length": "50mm",
+      "aperture": "f\/2.0",
+      "shutterspeed": "1\/500",
+      "frame_number": 2,
+      "speed": "400",
+      "tags": [],
+      "lens": {
+        "mount": "VM",
+        "prime": "true",
+        "focal_length": 50,
+        "max_focal_length": 0,
+        "min_aperture": "f\/1.4",
+        "notes": "",
+        "min_focal_length": -1,
+        "max_aperture": "f\/22",
+        "name": "Nokton 35mm"
+      },
+      "accessories": [],
+      "time": "2025-10-23T09:26:00+0200",
+      "image_reference_uuid": "3CA9C285-B52C-4392-BFCF-F1BE693EBB7A"
+    }
+  ]
+}
