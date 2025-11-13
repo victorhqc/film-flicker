@@ -13,7 +13,7 @@ EXIF metadata of the scans with the correct information.
 Whenever I go out to shoot film, as soon as I shot any picture with my camera,
 I take an additional photo with my phone towards my film camera so the settings
 are visible, i.e. Shutter Speed & Aperture. Then, at home after the shooting
-is done. I write the  information in a spreadsheet, making sure I write down
+is done. I write the information in a spreadsheet, making sure I write down
 the time of the shot and other information like ISO of the film, camera, lens,
 etc.
 
@@ -30,10 +30,10 @@ use.
 
 ```shell
 
-cargo run -- -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --maker <MAKER> -f <FILM_NAME>
+cargo run -- exif-apply -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --maker <MAKER> -f <FILM_NAME>
 
 # Example
-cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c Hexar_RF --maker KONICA -f "Kodak Gold 200"
+cargo run -- exif-apply -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c Hexar_RF --maker KONICA -f "Kodak Gold 200"
 ```
 
 An important note: The number of rows of the CSV must match the number of photos
@@ -43,9 +43,10 @@ the CSV rows will match the images chronologically.
 
 The CSV must be as follows
 
-| no | lens_name              | focal_length | date                      | iso | aperture | shutter_speed | exposure_compensation |
-|----|------------------------|--------------|---------------------------|-----|----------|---------------|-----------------------|
-| 1  | 7Artisans 35mm f/2 MII | 35           | 2024:06:15 15:39:00+02:00 | 200 | 2.8      | 1/60          | 0.67                  |
+| no  | lens_maker  | lens_name               | focal_length | date                      | iso | aperture | shutter_speed | exposure_compensation |
+| --- | ----------- | ----------------------- | ------------ | ------------------------- | --- | -------- | ------------- | --------------------- |
+| 1   | VOIGTLANDER | NOKTON 35mm F1.5        | 35           | 2024:06:15 15:39:00+02:00 | 200 | 2.8      | 1/60          | 0.67                  |
+| 2   | LEICA       | APO SUMMICRON 50mm F2.0 | 50           | 2024:06:15 15:52:00+02:00 | 200 | 4.0      | 1/60          | 0                     |
 
 An example file can be found under the `fixtures/` path.
 
@@ -95,10 +96,10 @@ run the CLI with cargo.
 
 ```shell
 
-cargo run -- -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --maker <MAKER> -f <FILM_NAME>
+cargo run -- exif-apply -s "<PATH_FOR_IMAGES>" -m "<PATH FOR CSV>.csv" -c <CAMERA_MODEL --maker <MAKER> -f <FILM_NAME>
 
 # Example
-cargo run -- -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
+cargo run -- exif-apply -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
 ```
 
 ## Build
@@ -124,7 +125,7 @@ in development mode.
 
    ```bat
    cargo wix --install
-   
+
    # Or to debug for errors
    cargo wix --install --nocapture
    ```
