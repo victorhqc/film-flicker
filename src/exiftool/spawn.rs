@@ -7,9 +7,7 @@ use winapi::um::winbase::CREATE_NO_WINDOW;
 
 #[cfg(not(target_os = "windows"))]
 pub fn spawn_exiftool(_exiftool_path: &Path) -> Command {
-    let cmd = Command::new("perl");
-
-    cmd
+    Command::new("perl")
 }
 
 #[cfg(target_os = "windows")]
