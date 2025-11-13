@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 use walkdir::WalkDir;
 
-pub fn get_photos(dir: &Path) -> Result<Vec<String>, Error> {
+pub fn get_paths(dir: &Path) -> Result<Vec<String>, PathError> {
     if dir.is_file() {
-        let info = get_photo_info(&dir.to_path_buf())?;
+        let info = get_path(&dir.to_path_buf())?;
         return Ok(vec![info]);
     }
 
@@ -20,7 +20,7 @@ pub fn get_photos(dir: &Path) -> Result<Vec<String>, Error> {
                 return Ok(None);
             }
 
-            let info = match get_photo_info(&path.to_path_buf()) {
+            let info = match get_path(&path.to_path_buf()) {
                 Ok(i) => i,
                 Err(err) => {
                     warn!("Failed to get file information: {:?}", err);
@@ -48,7 +48,7 @@ pub fn get_photos(dir: &Path) -> Result<Vec<String>, Error> {
     Ok(photos)
 }
 
-fn get_photo_info(path: &PathBuf) -> Result<String, Error> {
+fn get_path(path: &PathBuf) -> Result<String, PathError> {
     let metadata = fs::metadata(path).context(MetadataSnafu)?;
 
     let extension = path
@@ -60,14 +60,14 @@ fn get_photo_info(path: &PathBuf) -> Result<String, Error> {
     let file_type = metadata.file_type();
 
     if !file_type.is_file() || !is_photo(extension) {
-        return Err(Error::InvalidExtension);
+        return Err(PathError::InvalidExtension);
     }
 
     if let Some(p) = path.to_str() {
         return Ok(p.to_string());
     }
 
-    Err(Error::InvalidFile)
+    Err(PathError::InvalidFile)
 }
 
 fn is_photo(extension: &str) -> bool {
@@ -77,7 +77,7 @@ fn is_photo(extension: &str) -> bool {
 }
 
 #[derive(Debug, Snafu)]
-pub enum Error {
+pub enum PathError {
     #[snafu(display("Failed to read metadata: {}", source))]
     Metadata { source: io::Error },
 

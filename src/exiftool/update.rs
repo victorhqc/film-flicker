@@ -1,5 +1,6 @@
-use super::paths::{project_root, Error as PathError};
-use crate::utils::read_metadata::ExposureInfo;
+use super::spawn::spawn_exiftool;
+use crate::csv::ExposureInfo;
+use crate::utils::paths::{project_root, Error as PathError};
 use console::Emoji;
 use indicatif::ProgressBar;
 use log::{debug, trace};
@@ -8,7 +9,7 @@ use std::io::Error as IOError;
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
 use std::path::Path;
-use std::process::{Command, Output};
+use std::process::Output;
 #[cfg(target_os = "windows")]
 use winapi::um::winbase::CREATE_NO_WINDOW;
 
@@ -20,9 +21,9 @@ pub fn update_exif_metadata(
     exposures: Vec<ExposureInfo>,
     model: Option<&str>,
     maker: Option<&str>,
-) -> Result<(), Error> {
+) -> Result<(), UpdateError> {
     if files.len() != exposures.len() {
-        return Err(Error::BadInformation {
+        return Err(UpdateError::BadInformation {
             photos: files.len(),
             exposures: exposures.len(),
         });
@@ -69,24 +70,8 @@ pub fn update_exif_metadata(
     Ok(())
 }
 
-#[cfg(not(target_os = "windows"))]
-pub fn spawn_exiftool(_exiftool_path: &Path) -> Result<Command, Error> {
-    let cmd = Command::new("perl");
-
-    Ok(cmd)
-}
-
-#[cfg(target_os = "windows")]
-pub fn spawn_exiftool(exiftool_path: &Path) -> Result<Command, Error> {
-    let mut cmd = Command::new(exiftool_path);
-
-    cmd.creation_flags(CREATE_NO_WINDOW);
-
-    Ok(cmd)
-}
-
-pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
-    let mut cmd = spawn_exiftool(exiftool_path)?;
+fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), UpdateError> {
+    let mut cmd = spawn_exiftool(exiftool_path);
 
     #[cfg(not(target_os = "windows"))]
     let mut cmd = cmd.arg(exiftool_path);
@@ -165,7 +150,7 @@ pub fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
 
-        Err(Error::ExiftoolExe {
+        Err(UpdateError::ExiftoolExe {
             stderr: stderr.to_string(),
         })
     }
@@ -179,7 +164,7 @@ pub struct ExifArgs<'a> {
 }
 
 #[derive(Debug, Snafu)]
-pub enum Error {
+pub enum UpdateError {
     #[snafu(display("The amount of images do not match the number of exposures, photos found: {}, exposures in metadata: {}", photos, exposures))]
     BadInformation { photos: usize, exposures: usize },
 

@@ -5,7 +5,7 @@ use snafu::prelude::*;
 use std::path::Path;
 use std::str::FromStr;
 
-pub fn read_metadata(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
+pub fn read(path: &Path) -> Result<Vec<ExposureInfo>, ReadError> {
     let mut rdr = csv::Reader::from_path(path).context(InvalidCSVSnafu)?;
 
     let mut res = Vec::new();
@@ -44,10 +44,10 @@ pub struct BuildExposureInfo {
 }
 
 impl ExposureInfo {
-    pub fn build(args: BuildExposureInfo) -> Result<ExposureInfo, Error> {
+    pub fn build(args: BuildExposureInfo) -> Result<ExposureInfo, ReadError> {
         if let Some(shutter_speed) = &args.shutter_speed {
             if !Self::is_shutter_speed_valid(shutter_speed) {
-                return Err(Error::InvalidShutterSpeed {
+                return Err(ReadError::InvalidShutterSpeed {
                     text: shutter_speed.to_string(),
                 });
             }
@@ -78,12 +78,12 @@ impl ExposureInfo {
 
 fn parse_exposure_compensation(
     exposure_compensation: &Option<String>,
-) -> Result<Option<f32>, Error> {
+) -> Result<Option<f32>, ReadError> {
     if let Some(exp_comp) = exposure_compensation {
         // This to allow the format of "1 1/3" or "2 2/3"
         let parts = exp_comp.split(" ").collect::<Vec<&str>>();
         if parts.len() > 2 {
-            return Err(Error::InvalidExposureCompensation {
+            return Err(ReadError::InvalidExposureCompensation {
                 value: exp_comp.clone(),
             });
         }
@@ -110,7 +110,7 @@ fn parse_exposure_compensation(
 }
 
 #[derive(Debug, Snafu)]
-pub enum Error {
+pub enum ReadError {
     #[snafu(display("The Shutter speed is incorrect: {} does not follow the pattern", text))]
     InvalidShutterSpeed { text: String },
 
