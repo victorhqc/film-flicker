@@ -21,7 +21,7 @@ fn main() {
     debug!("Arguments: {:?}", args);
 
     match args.command {
-        Commands::ExifApply(args) => {
+        Commands::FromCsv(args) => {
             let photos_path = Path::new(&args.source);
             let metadata_path = Path::new(&args.metadata);
 
@@ -63,11 +63,11 @@ struct Args {
 #[derive(Subcommand, Debug)]
 enum Commands {
     /// Applies EXIF Metadata to photos based on a CSV File
-    ExifApply(ExifApplyArgs),
+    FromCsv(ExifMetadataFromCsv),
 }
 
 #[derive(Parser, Debug)]
-struct ExifApplyArgs {
+struct ExifMetadataFromCsv {
     /// Path for the photos
     #[clap(
         short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap()

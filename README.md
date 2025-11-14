@@ -24,10 +24,10 @@ _Note: This tool is under development._
 Build the tool locally. Check the Development section for instructions.
 
 ```shell
-cargo run -- exif-apply -s "<PATH_FOR_IMAGES>" -m "<PATH_FOR_CSV>.csv" -c <CAMERA_MODEL> --maker <MAKER> -f <FILM_NAME>
+cargo run -- from-csv -s "<PATH_FOR_IMAGES>" -m "<PATH_FOR_CSV>.csv" -c <CAMERA_MODEL> --maker <MAKER> -f <FILM_NAME>
 
 # Example
-cargo run -- exif-apply -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c Hexar_RF --maker KONICA -f "Kodak Gold 200"
+cargo run -- from-csv -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c Hexar_RF --maker KONICA -f "Kodak Gold 200"
 ```
 
 **Important:** The number of CSV rows must match the number of photos in the
@@ -88,10 +88,10 @@ This project requires [`exiftool`](https://exiftool.org/). Run the following scr
 After installing [`exiftool`](https://exiftool.org/), run the CLI with cargo:
 
 ```shell
-cargo run -- exif-apply -s "<PATH_FOR_IMAGES>" -m "<PATH_FOR_CSV>.csv" -c <CAMERA_MODEL> --maker <MAKER> -f <FILM_NAME>
+cargo run -- from-csv -s "<PATH_FOR_IMAGES>" -m "<PATH_FOR_CSV>.csv" -c <CAMERA_MODEL> --maker <MAKER> -f <FILM_NAME>
 
 # Example
-cargo run -- exif-apply -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
+cargo run -- from-csv -s "E:\Photos\Film Scans\2024\06-June" -m "E:\Photos\Film Scans\2024\06-June\metadata.csv" -c "Hexar RF" --maker KONICA -f "Kodak Gold 200"
 ```
 
 ## Build
