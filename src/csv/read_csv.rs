@@ -2,7 +2,7 @@ use crate::exposure_info::{BuildExposureInfo, ExposureError, ExposureInfo};
 use snafu::prelude::*;
 use std::path::Path;
 
-pub fn read(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
+pub fn read_csv(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
     let mut rdr = csv::Reader::from_path(path).context(InvalidCSVSnafu)?;
 
     let mut res = Vec::new();

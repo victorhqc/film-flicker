@@ -4,7 +4,7 @@ mod exposure_info;
 mod photos;
 mod utils;
 
-use crate::csv::read;
+use crate::csv::read_csv;
 use crate::exiftool::update_exif_metadata;
 use crate::photos::get_paths;
 use clap::{Parser, Subcommand};
@@ -32,7 +32,7 @@ fn handle_exif_apply(args: ExifApplyArgs) {
     let metadata_path = Path::new(&args.metadata);
 
     let photo_paths = get_paths(source_path).unwrap();
-    let exposures = read(metadata_path).unwrap();
+    let exposures = read_csv(metadata_path).unwrap();
 
     let result = update_exif_metadata(photo_paths, exposures);
     match result {
