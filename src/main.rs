@@ -5,13 +5,13 @@ mod exposure_info;
 mod photos;
 mod utils;
 
-use crate::csv::Csv;
 use crate::exif_metadata::ExifMetadata;
+use crate::{csv::Csv, exif_metadata::ReadExifMetadata};
 use clap::{Parser, Subcommand};
 use dirs::home_dir;
 use dotenv::dotenv;
 use log::debug;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn main() {
     dotenv().ok();
@@ -22,19 +22,26 @@ fn main() {
 
     match args.command {
         Commands::ExifApply(args) => {
-            handle_exif_apply(args);
+            let photos_path = Path::new(&args.source);
+            let metadata_path = Path::new(&args.metadata);
+
+            update_metadata_from_csv(&photos_path.to_path_buf(), &metadata_path.to_path_buf())
         }
     }
 }
 
-fn handle_exif_apply(args: ExifApplyArgs) {
-    let photos_path = Path::new(&args.source);
-    let metadata_path = Path::new(&args.metadata);
+fn update_metadata_from_csv(photos_path: &PathBuf, metadata_path: &PathBuf) {
+    let csv = Csv::new(metadata_path);
+    let metadata = ExifMetadata::new(photos_path);
+    update_metadata(metadata, csv);
+}
 
-    let csv = Csv::new(&metadata_path.to_path_buf());
-    let metadata = ExifMetadata::new(&photos_path.to_path_buf());
-
-    let result = metadata.update_photos(csv);
+fn update_metadata<M>(metadata: ExifMetadata, strategy: M)
+where
+    M: ReadExifMetadata,
+    M::Error: std::error::Error + 'static,
+{
+    let result = metadata.update_photos(strategy);
 
     match result {
         Ok(_) => debug!("Done"),
