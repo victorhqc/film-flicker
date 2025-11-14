@@ -1,22 +1,37 @@
-use crate::exposure_info::{BuildExposureInfo, ExposureError, ExposureInfo};
+use crate::{
+    exif_metadata::ReadExifMetadata,
+    exposure_info::{BuildExposureInfo, ExposureError, ExposureInfo},
+};
 use snafu::prelude::*;
-use std::path::Path;
+use std::path::PathBuf;
 
-pub fn read_csv(path: &Path) -> Result<Vec<ExposureInfo>, Error> {
-    let mut rdr = csv::Reader::from_path(path).context(InvalidCSVSnafu)?;
-
-    let mut res = Vec::new();
-    for exp in rdr.deserialize() {
-        let args: BuildExposureInfo = exp.context(FailedToParseSnafu)?;
-        let exposure = ExposureInfo::build(args).context(ExposureSnafu)?;
-
-        res.push(exposure);
-    }
-
-    Ok(res)
+pub struct Csv {
+    path: PathBuf,
 }
 
-type Error = ReadError;
+impl Csv {
+    pub fn new(path: &PathBuf) -> Self {
+        Self { path: path.clone() }
+    }
+}
+
+impl ReadExifMetadata for Csv {
+    type Error = ReadError;
+
+    fn read_exif_metadata(&self) -> Result<Vec<ExposureInfo>, Self::Error> {
+        let mut rdr = csv::Reader::from_path(&self.path).context(InvalidCSVSnafu)?;
+
+        let mut res = Vec::new();
+        for exp in rdr.deserialize() {
+            let args: BuildExposureInfo = exp.context(FailedToParseSnafu)?;
+            let exposure = ExposureInfo::build(args).context(ExposureSnafu)?;
+
+            res.push(exposure);
+        }
+
+        Ok(res)
+    }
+}
 
 #[derive(Debug, Snafu)]
 pub enum ReadError {

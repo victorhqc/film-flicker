@@ -1,12 +1,12 @@
 mod csv;
+mod exif_metadata;
 mod exiftool;
 mod exposure_info;
 mod photos;
 mod utils;
 
-use crate::csv::read_csv;
-use crate::exiftool::update_exif_metadata;
-use crate::photos::get_paths;
+use crate::csv::Csv;
+use crate::exif_metadata::ExifMetadata;
 use clap::{Parser, Subcommand};
 use dirs::home_dir;
 use dotenv::dotenv;
@@ -28,13 +28,14 @@ fn main() {
 }
 
 fn handle_exif_apply(args: ExifApplyArgs) {
-    let source_path = Path::new(&args.source);
+    let photos_path = Path::new(&args.source);
     let metadata_path = Path::new(&args.metadata);
 
-    let photo_paths = get_paths(source_path).unwrap();
-    let exposures = read_csv(metadata_path).unwrap();
+    let csv = Csv::new(&metadata_path.to_path_buf());
+    let metadata = ExifMetadata::new(&photos_path.to_path_buf());
 
-    let result = update_exif_metadata(photo_paths, exposures);
+    let result = metadata.update_photos(csv);
+
     match result {
         Ok(_) => debug!("Done"),
         Err(err) => {
