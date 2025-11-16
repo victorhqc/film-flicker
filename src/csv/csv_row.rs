@@ -1,4 +1,6 @@
-use crate::exposure::{Camera, Exposure, ExposureCompensation, Lens};
+use crate::exposure::{
+    Camera, Exposure, ExposureCompensation, Lens, ShutterSpeed, ShutterSpeedError,
+};
 use fraction::{error::ParseError, Fraction, ToPrimitive};
 use serde::Deserialize;
 use snafu::prelude::*;
@@ -22,26 +24,19 @@ impl TryFrom<CsvRow> for Exposure {
     type Error = Error;
 
     fn try_from(value: CsvRow) -> Result<Self, Self::Error> {
-        if let Some(shutter_speed) = &value.shutter_speed {
-            if !Self::is_shutter_speed_valid(shutter_speed) {
-                return Err(Error::InvalidShutterSpeed {
-                    text: shutter_speed.to_string(),
-                });
-            }
-        }
-
-        let exp_comp = Option::<ExposureCompensation>::try_from(&value)?;
+        let exposure_compensation = Option::<ExposureCompensation>::try_from(&value)?;
         let camera = Option::<Camera>::from(&value);
         let lens = Option::<Lens>::from(&value);
+        let shutter_speed = Option::<ShutterSpeed>::try_from(&value)?;
 
         let result = Exposure {
             camera,
             lens,
-            date: value.date,
+            shutter_speed,
+            exposure_compensation,
             iso: value.iso,
             aperture: value.aperture,
-            shutter_speed: value.shutter_speed,
-            exposure_compensation: exp_comp,
+            date: value.date,
         };
 
         Ok(result)
@@ -67,6 +62,21 @@ impl From<&CsvRow> for Option<Lens> {
             Some(Lens::new(focal_length, lens_name, lens_maker, None))
         } else {
             None
+        }
+    }
+}
+
+impl TryFrom<&CsvRow> for Option<ShutterSpeed> {
+    type Error = Error;
+
+    fn try_from(value: &CsvRow) -> Result<Self, Self::Error> {
+        if let Some(shutter_speed) = &value.shutter_speed {
+            let shutter_speed =
+                ShutterSpeed::try_new(shutter_speed.as_str()).context(ShutterSpeedSnafu)?;
+
+            Ok(Some(shutter_speed))
+        } else {
+            Ok(None)
         }
     }
 }
@@ -112,8 +122,8 @@ type Error = CsvRowError;
 
 #[derive(Debug, Snafu)]
 pub enum CsvRowError {
-    #[snafu(display("The Shutter speed is incorrect: {} does not follow the pattern", text))]
-    InvalidShutterSpeed { text: String },
+    #[snafu(display("{}", source))]
+    ShutterSpeed { source: ShutterSpeedError },
 
     #[snafu(display("Wrong format for exposure compensation \"{}\": {:?}", value, source))]
     ExposureCompensation { source: ParseError, value: String },

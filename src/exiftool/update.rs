@@ -92,8 +92,8 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 
     if let Some(shutter_speed) = &args.exposure.shutter_speed {
         cmd = cmd
-            .arg(format!("-ShutterSpeedValue={}", shutter_speed))
-            .arg(format!("-ExposureTime={}", shutter_speed));
+            .arg(format!("-ShutterSpeedValue={}", shutter_speed.value()))
+            .arg(format!("-ExposureTime={}", shutter_speed.value()));
     }
 
     if let Some(iso) = args.exposure.iso {

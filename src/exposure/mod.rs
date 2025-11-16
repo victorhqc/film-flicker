@@ -3,10 +3,12 @@ use regex::Regex;
 mod camera;
 mod exposure_compensation;
 mod lens;
+mod shutter_speed;
 
 pub use camera::*;
 pub use exposure_compensation::*;
 pub use lens::*;
+pub use shutter_speed::*;
 
 #[derive(Debug)]
 pub struct Exposure {
@@ -15,7 +17,7 @@ pub struct Exposure {
     pub date: Option<String>,
     pub iso: Option<i32>,
     pub aperture: Option<f32>,
-    pub shutter_speed: Option<String>,
+    pub shutter_speed: Option<ShutterSpeed>,
     pub exposure_compensation: Option<ExposureCompensation>,
 }
 
