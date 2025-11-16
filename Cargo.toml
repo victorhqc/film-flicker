@@ -2,7 +2,7 @@
 name = "film-flicker"
 description = "Changes Exif-Metadata for Photography Scans"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT"
 authors = ["Victor Quiroz"]
 

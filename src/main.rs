@@ -32,9 +32,11 @@ fn main() {
         Commands::FromFilmLogbook(args) => {
             let photos_path = Path::new(&args.source);
             let metadata_path = Path::new(&args.metadata);
+            let adapter_path = Path::new(&args.adapter);
 
             update_metadata_from_film_logbook(
                 &photos_path.to_path_buf(),
+                &adapter_path.to_path_buf(),
                 &metadata_path.to_path_buf(),
             )
         }
@@ -47,8 +49,12 @@ fn update_metadata_from_csv(photos_path: &PathBuf, metadata_path: &PathBuf) {
     update_metadata(metadata, csv);
 }
 
-fn update_metadata_from_film_logbook(photos_path: &PathBuf, metadata_path: &PathBuf) {
-    let json = FilmLogbookJson::new(metadata_path);
+fn update_metadata_from_film_logbook(
+    photos_path: &PathBuf,
+    adapter_path: &PathBuf,
+    metadata_path: &PathBuf,
+) {
+    let json = FilmLogbookJson::new(metadata_path, adapter_path);
     let metadata = ExifMetadata::new(photos_path);
     update_metadata(metadata, json);
 }
@@ -108,6 +114,10 @@ struct ExifMetadataFromFilmLogbook {
     /// Path where the photos are
     #[clap(short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap())]
     source: String,
+
+    /// Path for a Mapper for Cameras & Lenses information
+    #[clap(short, long)]
+    adapter: String,
 
     /// Path for the JSON File that Filmlog app exports
     #[clap(short, long)]
