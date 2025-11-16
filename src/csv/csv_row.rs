@@ -1,4 +1,4 @@
-use crate::exposure::{Exposure, ExposureCompensation};
+use crate::exposure::{Camera, Exposure, ExposureCompensation};
 use fraction::{error::ParseError, Fraction, ToPrimitive};
 use serde::Deserialize;
 use snafu::prelude::*;
@@ -31,10 +31,10 @@ impl TryFrom<CsvRow> for Exposure {
         }
 
         let exp_comp = Option::<ExposureCompensation>::try_from(&value)?;
+        let camera = Option::<Camera>::from(&value);
 
         let result = Exposure {
-            camera_name: value.camera_name,
-            camera_maker: value.camera_maker,
+            camera,
             lens_name: value.lens_name,
             lens_maker: value.lens_maker,
             date: value.date,
@@ -46,6 +46,16 @@ impl TryFrom<CsvRow> for Exposure {
         };
 
         Ok(result)
+    }
+}
+
+impl From<&CsvRow> for Option<Camera> {
+    fn from(value: &CsvRow) -> Self {
+        if let Some((name, maker)) = value.camera_name.as_ref().zip(value.camera_maker.as_ref()) {
+            Some(Camera::new(name, maker, None))
+        } else {
+            None
+        }
     }
 }
 

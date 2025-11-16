@@ -98,12 +98,9 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
         cmd = cmd.arg(format!("-LensMake={}", lens_maker));
     }
 
-    if let Some(maker) = &args.exposure.camera_maker {
-        cmd = cmd.arg(format!("-Make={}", maker));
-    }
-
-    if let Some(model) = &args.exposure.camera_name {
-        cmd = cmd.arg(format!("-Model={}", model));
+    if let Some(camera) = &args.exposure.camera {
+        cmd = cmd.arg(format!("-Make={}", camera.maker));
+        cmd = cmd.arg(format!("-Model={}", camera.name));
     }
 
     if let Some(exp_comp) = &args.exposure.exposure_compensation {
