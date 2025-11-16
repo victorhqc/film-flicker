@@ -1,7 +1,7 @@
 use crate::exposure::{
     Camera, Exposure, ExposureCompensation, Lens, ShutterSpeed, ShutterSpeedError,
 };
-use fraction::{error::ParseError, Fraction, ToPrimitive};
+use fraction::{Fraction, ToPrimitive, error::ParseError};
 use serde::Deserialize;
 use snafu::prelude::*;
 use std::str::FromStr;
@@ -37,6 +37,7 @@ impl TryFrom<CsvRow> for Exposure {
             iso: value.iso,
             aperture: value.aperture,
             date: value.date,
+            geo_location: None,
         };
 
         Ok(result)
@@ -102,11 +103,7 @@ impl TryFrom<&CsvRow> for Option<ExposureCompensation> {
                     .unwrap();
                 let float: f32 = float.to_f32().unwrap();
 
-                if acc >= 0.0 {
-                    acc + float
-                } else {
-                    acc - float
-                }
+                if acc >= 0.0 { acc + float } else { acc - float }
             });
 
             let exp_comp = ExposureCompensation::new(float);
