@@ -7,7 +7,7 @@ use log::{debug, trace};
 use snafu::prelude::*;
 use std::io::Error as IOError;
 use std::path::Path;
-use std::process::Output;
+use std::process::{Output, Stdio};
 
 static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 
@@ -44,6 +44,10 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<Exposure>) -> Res
         let args = ExifArgs { file, exposure };
 
         exiftool(&args, &exiftool_path)?;
+
+        // This needs to happen after exiftool updates the values
+        correct_dates(&exiftool_path, file.as_str())?;
+
         trace!("\n");
         pb.inc(1);
     }
@@ -56,6 +60,7 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<Exposure>) -> Res
 
 fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     let mut cmd = spawn_exiftool(exiftool_path);
+    let cmd = cmd.stdout(Stdio::null());
 
     #[cfg(not(target_os = "windows"))]
     let mut cmd = cmd.arg(exiftool_path);
@@ -147,6 +152,49 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 pub struct ExifArgs<'a> {
     file: &'a str,
     exposure: &'a Exposure,
+}
+
+/// For some reason, the dates do not match in Apple Photos until this is run
+pub fn correct_dates(exiftool_path: &Path, photo_path: &str) -> Result<(), Error> {
+    let mut cmd = spawn_exiftool(exiftool_path);
+    let cmd = cmd.stdout(Stdio::null());
+
+    #[cfg(not(target_os = "windows"))]
+    let mut cmd = cmd.arg(exiftool_path);
+
+    #[cfg(target_os = "windows")]
+    let mut cmd = &mut cmd;
+
+    cmd = cmd.arg(String::from("-DateCreated<CreateDate"));
+    cmd = cmd.arg(String::from("-TimeCreated<CreateDate"));
+
+    cmd = cmd.arg(photo_path);
+
+    #[cfg(not(target_os = "windows"))]
+    let output: Output = {
+        let child = cmd.spawn().context(ExiftoolSpawnSnafu {
+            path: format!("{}", exiftool_path.display()),
+        })?;
+
+        child.wait_with_output().context(ExiftoolWaitSnafu)?
+    };
+
+    #[cfg(target_os = "windows")]
+    let output: Output = {
+        cmd.output().context(ExiftoolSpawnSnafu {
+            path: format!("{}", exiftool_path.display()),
+        })?
+    };
+
+    if output.status.success() {
+        Ok(())
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+
+        Err(Error::ExiftoolExe {
+            stderr: stderr.to_string(),
+        })
+    }
 }
 
 type Error = UpdateError;
