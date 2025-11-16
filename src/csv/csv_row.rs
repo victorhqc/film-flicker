@@ -1,4 +1,4 @@
-use crate::exposure::{Camera, Exposure, ExposureCompensation};
+use crate::exposure::{Camera, Exposure, ExposureCompensation, Lens};
 use fraction::{error::ParseError, Fraction, ToPrimitive};
 use serde::Deserialize;
 use snafu::prelude::*;
@@ -32,14 +32,13 @@ impl TryFrom<CsvRow> for Exposure {
 
         let exp_comp = Option::<ExposureCompensation>::try_from(&value)?;
         let camera = Option::<Camera>::from(&value);
+        let lens = Option::<Lens>::from(&value);
 
         let result = Exposure {
             camera,
-            lens_name: value.lens_name,
-            lens_maker: value.lens_maker,
+            lens,
             date: value.date,
             iso: value.iso,
-            focal_length: value.focal_length,
             aperture: value.aperture,
             shutter_speed: value.shutter_speed,
             exposure_compensation: exp_comp,
@@ -53,6 +52,19 @@ impl From<&CsvRow> for Option<Camera> {
     fn from(value: &CsvRow) -> Self {
         if let Some((name, maker)) = value.camera_name.as_ref().zip(value.camera_maker.as_ref()) {
             Some(Camera::new(name, maker, None))
+        } else {
+            None
+        }
+    }
+}
+
+impl From<&CsvRow> for Option<Lens> {
+    fn from(value: &CsvRow) -> Self {
+        if let Some(focal_length) = value.focal_length {
+            let lens_name = value.lens_name.as_ref().map(|x| x.as_str());
+            let lens_maker = value.lens_maker.as_ref().map(|x| x.as_str());
+
+            Some(Lens::new(focal_length, lens_name, lens_maker, None))
         } else {
             None
         }

@@ -2,16 +2,16 @@ use regex::Regex;
 
 mod camera;
 mod exposure_compensation;
+mod lens;
 
 pub use camera::*;
 pub use exposure_compensation::*;
+pub use lens::*;
 
 #[derive(Debug)]
 pub struct Exposure {
     pub camera: Option<Camera>,
-    pub lens_name: Option<String>,
-    pub lens_maker: Option<String>,
-    pub focal_length: Option<f32>,
+    pub lens: Option<Lens>,
     pub date: Option<String>,
     pub iso: Option<i32>,
     pub aperture: Option<f32>,

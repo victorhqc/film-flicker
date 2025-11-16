@@ -73,11 +73,21 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
             .arg(format!("-aperturevalue={}", aperture));
     }
 
-    if let Some(focal_length) = args.exposure.focal_length {
+    if let Some(lens) = &args.exposure.lens {
+        let focal_length = lens.focal_length;
+
         cmd = cmd
             .arg(format!("-FocalLength={}mm", focal_length))
             .arg(format!("-Lens={}mm", focal_length))
             .arg(format!("-FocalLengthIn35mmFormat={}mm", focal_length));
+
+        if let Some(lens_name) = &lens.name {
+            cmd = cmd.arg(format!("-LensModel={}", lens_name));
+        }
+
+        if let Some(lens_maker) = &lens.maker {
+            cmd = cmd.arg(format!("-LensMake={}", lens_maker));
+        }
     }
 
     if let Some(shutter_speed) = &args.exposure.shutter_speed {
@@ -88,14 +98,6 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 
     if let Some(iso) = args.exposure.iso {
         cmd = cmd.arg(format!("-iso={}", iso));
-    }
-
-    if let Some(lens_name) = &args.exposure.lens_name {
-        cmd = cmd.arg(format!("-LensModel={}", lens_name));
-    }
-
-    if let Some(lens_maker) = &args.exposure.lens_maker {
-        cmd = cmd.arg(format!("-LensMake={}", lens_maker));
     }
 
     if let Some(camera) = &args.exposure.camera {
