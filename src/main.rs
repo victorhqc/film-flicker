@@ -10,7 +10,6 @@ use crate::exif_metadata::ExifMetadata;
 use crate::film_logbook::FilmLogbookJson;
 use crate::{csv::Csv, exif_metadata::ReadExifMetadata};
 use clap::{Parser, Subcommand};
-use dirs::home_dir;
 use dotenv::dotenv;
 use log::debug;
 use std::path::{Path, PathBuf};
@@ -95,9 +94,7 @@ enum Commands {
 #[derive(Parser, Debug)]
 struct ExifMetadataFromCsv {
     /// Path where the photos are
-    #[clap(
-        short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap()
-    )]
+    #[clap(short, long)]
     source: String,
 
     /// Path for the csv file with the metadata.
@@ -112,7 +109,7 @@ struct ExifMetadataFromCsv {
 #[derive(Parser, Debug)]
 struct ExifMetadataFromFilmLogbook {
     /// Path where the photos are
-    #[clap(short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap())]
+    #[clap(short, long)]
     source: String,
 
     /// Path for a Mapper for Cameras & Lenses information
