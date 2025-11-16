@@ -20,7 +20,7 @@ impl ShutterSpeed {
     }
 
     fn is_valid(value: &str) -> bool {
-        let expr = Regex::new(r#"1/\d+|\d+""#).unwrap();
+        let expr = Regex::new(r#"^(?:1/[1-9]\d*|[1-9]\d*(?:\"|s)?)$"#).unwrap();
         expr.is_match(value)
     }
 }

@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ExposureCompensation(f32);
 
 impl ExposureCompensation {

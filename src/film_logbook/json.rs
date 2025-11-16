@@ -1,7 +1,12 @@
-use crate::exposure::{Camera, Lens, LensKind};
+use crate::exposure::{
+    Camera, ExposureCompensation, Lens, LensKind, ShutterSpeed, ShutterSpeedError,
+};
 use crate::film_logbook::adapter::{find_adapter, read_adapters};
-use crate::utils::parse_mm;
+use crate::utils::{
+    ParseExposureCompensationError, parse_aperture, parse_exposure_compensation, parse_mm,
+};
 use crate::{exif_metadata::ReadExifMetadata, exposure::Exposure};
+
 use log::debug;
 use serde::{Deserialize, Serialize};
 use snafu::prelude::*;
@@ -65,6 +70,26 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
             let lens = Option::<Lens>::from(&picture_and_adapter);
             debug!("{:?}", lens);
 
+            let iso: Option<i32> = picture.speed.parse().ok();
+            debug!("ISO {:?}", iso);
+
+            let aperture: Option<f32> = parse_aperture(&picture.aperture);
+            debug!("APerture {:?}", aperture);
+
+            let shutter_speed =
+                ShutterSpeed::try_new(&picture.shutterspeed).context(ShutterSpeedSnafu {
+                    frame_number: picture.frame_number,
+                })?;
+            let shutter_speed: Option<ShutterSpeed> = Some(shutter_speed);
+            debug!("{:?}", shutter_speed);
+
+            let exposure_compensation = parse_exposure_compensation(&picture.exposure_compensation)
+                .context(EsposureCompensationSnafu {
+                    frame_number: picture.frame_number,
+                })?;
+            let exposure_compensation: Option<ExposureCompensation> = Some(exposure_compensation);
+            debug!("{:?}", exposure_compensation);
+
             debug!("-------");
 
             if camera.is_none() {
@@ -79,10 +104,23 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
                 });
             }
 
-            unimplemented!()
-            // let exposure = Exposure { camera };
+            if aperture.is_none() {
+                return Err(ParseError::MissingAperture {
+                    frame_number: picture.frame_number,
+                });
+            }
+
+            // let exposure = Exposure {
+            //     camera,
+            //     lens,
+            //     iso,
+            //     aperture,
+            //     shutter_speed,
+            //     exposure_compensation,
+            // };
 
             // exposures.push(exposure);
+            unimplemented!()
         }
 
         Ok(exposures)
@@ -144,7 +182,7 @@ struct FilmLogbookJsonPayload {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct FilmLogbookPicture {
+pub struct FilmLogbookPicture {
     frame_number: usize,
     image_reference_uuid: String,
     camera: FilmLogbookCamera,
@@ -160,14 +198,14 @@ struct FilmLogbookPicture {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct FilmLogbookCamera {
+pub struct FilmLogbookCamera {
     notes: String,
     name: String,
     mount: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct FilmLogbookLens {
+pub struct FilmLogbookLens {
     mount: String,
     max_focal_length: f32,
     min_focal_length: f32,
@@ -190,6 +228,32 @@ pub enum ParseError {
         frame_number
     ))]
     MissingLens { frame_number: usize },
+
+    #[snafu(display(
+        "Failed to read the aperture for a picture (frame #{}). Verify the that the aperture starts with f/",
+        frame_number
+    ))]
+    MissingAperture { frame_number: usize },
+
+    #[snafu(display(
+        "Failed to read the shutter speed for a picture (frame #{}): {}",
+        frame_number,
+        source
+    ))]
+    ShutterSpeed {
+        source: ShutterSpeedError,
+        frame_number: usize,
+    },
+
+    #[snafu(display(
+        "Failed to parse the exposure compensation (frame #{}): {}",
+        frame_number,
+        source
+    ))]
+    EsposureCompensation {
+        source: ParseExposureCompensationError,
+        frame_number: usize,
+    },
 }
 
 #[derive(Debug, Snafu)]
