@@ -1,7 +1,8 @@
 mod csv;
 mod exif_metadata;
 mod exiftool;
-mod exposure_info;
+mod exposure;
+mod film_logbook;
 mod photos;
 mod utils;
 
@@ -26,6 +27,10 @@ fn main() {
             let metadata_path = Path::new(&args.metadata);
 
             update_metadata_from_csv(&photos_path.to_path_buf(), &metadata_path.to_path_buf())
+        }
+        Commands::FromFilmLogbook(args) => {
+            let photos_path = Path::new(&args.source);
+            let metadata_path = Path::new(&args.metadata);
         }
     }
 }
@@ -64,11 +69,14 @@ struct Args {
 enum Commands {
     /// Applies EXIF Metadata to photos based on a CSV File
     FromCsv(ExifMetadataFromCsv),
+
+    /// Applies EXIF Metadata from Michael Steurer's Film Logbook App
+    FromFilmLogbook(ExifMetadataFromFilmLogbook),
 }
 
 #[derive(Parser, Debug)]
 struct ExifMetadataFromCsv {
-    /// Path for the photos
+    /// Path where the photos are
     #[clap(
         short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap()
     )]
@@ -81,4 +89,15 @@ struct ExifMetadataFromCsv {
     /// Name of the film
     #[clap(short, long)]
     film: Option<String>,
+}
+
+#[derive(Parser, Debug)]
+struct ExifMetadataFromFilmLogbook {
+    /// Path where the photos are
+    #[clap(short, long, default_value_t = home_dir().unwrap().into_os_string().into_string().unwrap())]
+    source: String,
+
+    /// Path for the JSON File that Filmlog app exports
+    #[clap(short, long)]
+    metadata: String,
 }
