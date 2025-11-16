@@ -7,6 +7,7 @@ mod photos;
 mod utils;
 
 use crate::exif_metadata::ExifMetadata;
+use crate::film_logbook::FilmLogbookJson;
 use crate::{csv::Csv, exif_metadata::ReadExifMetadata};
 use clap::{Parser, Subcommand};
 use dirs::home_dir;
@@ -31,6 +32,11 @@ fn main() {
         Commands::FromFilmLogbook(args) => {
             let photos_path = Path::new(&args.source);
             let metadata_path = Path::new(&args.metadata);
+
+            update_metadata_from_film_logbook(
+                &photos_path.to_path_buf(),
+                &metadata_path.to_path_buf(),
+            )
         }
     }
 }
@@ -39,6 +45,12 @@ fn update_metadata_from_csv(photos_path: &PathBuf, metadata_path: &PathBuf) {
     let csv = Csv::new(metadata_path);
     let metadata = ExifMetadata::new(photos_path);
     update_metadata(metadata, csv);
+}
+
+fn update_metadata_from_film_logbook(photos_path: &PathBuf, metadata_path: &PathBuf) {
+    let json = FilmLogbookJson::new(metadata_path);
+    let metadata = ExifMetadata::new(photos_path);
+    update_metadata(metadata, json);
 }
 
 fn update_metadata<M>(metadata: ExifMetadata, strategy: M)

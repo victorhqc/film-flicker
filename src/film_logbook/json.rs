@@ -1,4 +1,5 @@
 use crate::{exif_metadata::ReadExifMetadata, exposure::Exposure};
+use log::debug;
 use serde::{Deserialize, Serialize};
 use snafu::prelude::*;
 use std::fs;
@@ -32,7 +33,19 @@ impl TryFrom<&FilmLogbookJsonPayload> for Vec<Exposure> {
     type Error = ParseError;
 
     fn try_from(value: &FilmLogbookJsonPayload) -> Result<Self, Self::Error> {
-        unimplemented!()
+        let mut pictures = value.pictures.clone();
+        pictures.sort_by_key(|p| p.frame_number);
+
+        let exposures = pictures
+            .into_iter()
+            .map(|picture| {
+                debug!("Picture {:?}", picture);
+
+                unimplemented!()
+            })
+            .collect();
+
+        Ok(exposures)
     }
 }
 
@@ -42,9 +55,11 @@ struct FilmLogbookJsonPayload {
     speed: String,
     film: String,
     start: String,
+    end: String,
+    pictures: Vec<FilmLogbookPicture>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct FilmLogbookPicture {
     frame_number: usize,
     image_reference_uuid: String,
@@ -60,14 +75,14 @@ struct FilmLogbookPicture {
     speed: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct FilmLogbookCamera {
     notes: String,
     name: String,
     mount: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct FilmLogbookLens {
     mount: String,
     max_focal_length: f32,
