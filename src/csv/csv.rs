@@ -1,7 +1,5 @@
-use crate::{
-    exif_metadata::ReadExifMetadata,
-    exposure_info::{BuildExposureInfo, ExposureError, ExposureInfo},
-};
+use super::csv_row::{CsvRow, CsvRowError};
+use crate::{exif_metadata::ReadExifMetadata, exposure::Exposure};
 use snafu::prelude::*;
 use std::path::PathBuf;
 
@@ -18,13 +16,13 @@ impl Csv {
 impl ReadExifMetadata for Csv {
     type Error = ReadError;
 
-    fn read_exif_metadata(&self) -> Result<Vec<ExposureInfo>, Self::Error> {
+    fn read_exif_metadata(&self) -> Result<Vec<Exposure>, Self::Error> {
         let mut rdr = csv::Reader::from_path(&self.path).context(InvalidCSVSnafu)?;
 
         let mut res = Vec::new();
         for exp in rdr.deserialize() {
-            let args: BuildExposureInfo = exp.context(FailedToParseSnafu)?;
-            let exposure = ExposureInfo::build(args).context(ExposureSnafu)?;
+            let args: CsvRow = exp.context(FailedToParseSnafu)?;
+            let exposure = Exposure::try_from(args).context(ExposureSnafu)?;
 
             res.push(exposure);
         }
@@ -42,5 +40,5 @@ pub enum ReadError {
     FailedToParse { source: csv::Error },
 
     #[snafu(display("Failed to build the exposure value: {}", source))]
-    Exposure { source: ExposureError },
+    Exposure { source: CsvRowError },
 }

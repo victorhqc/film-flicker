@@ -2,13 +2,13 @@ use snafu::prelude::*;
 use std::path::{Path, PathBuf};
 
 use crate::exiftool::{update_exif_metadata, UpdateError};
-use crate::exposure_info::ExposureInfo;
+use crate::exposure::Exposure;
 use crate::photos::{get_paths, PathsError};
 
 pub trait ReadExifMetadata {
     type Error;
 
-    fn read_exif_metadata(&self) -> Result<Vec<ExposureInfo>, Self::Error>;
+    fn read_exif_metadata(&self) -> Result<Vec<Exposure>, Self::Error>;
 }
 
 pub struct ExifMetadata {

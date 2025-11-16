@@ -1,5 +1,5 @@
 use super::spawn::spawn_exiftool;
-use crate::exposure_info::ExposureInfo;
+use crate::exposure::Exposure;
 use crate::utils::paths::{project_root, PathsError};
 use console::Emoji;
 use indicatif::ProgressBar;
@@ -11,7 +11,7 @@ use std::process::Output;
 
 static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 
-pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<ExposureInfo>) -> Result<(), Error> {
+pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<Exposure>) -> Result<(), Error> {
     if files.len() != exposures.len() {
         return Err(Error::BadInformation {
             photos: files.len(),
@@ -106,9 +106,9 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
         cmd = cmd.arg(format!("-Model={}", model));
     }
 
-    if let Some(exp_comp) = args.exposure.exposure_compensation {
-        trace!("Applying exposure compensation as {}", exp_comp);
-        cmd = cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp));
+    if let Some(exp_comp) = &args.exposure.exposure_compensation {
+        trace!("Applying exposure compensation as {}", exp_comp.value());
+        cmd = cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp.value()));
     }
 
     let cmd = cmd.arg(args.file);
@@ -142,7 +142,7 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
 
 pub struct ExifArgs<'a> {
     file: &'a str,
-    exposure: &'a ExposureInfo,
+    exposure: &'a Exposure,
 }
 
 type Error = UpdateError;
