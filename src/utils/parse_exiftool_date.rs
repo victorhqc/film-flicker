@@ -2,6 +2,14 @@ use snafu::prelude::*;
 use time::OffsetDateTime;
 use time::macros::format_description;
 
+pub fn parse_time_to_exiftool_format(time: &OffsetDateTime) -> Result<String, ExiftoolDateError> {
+    let exif_format = format_description!(
+        "[year]:[month]:[day] [hour]:[minute]:[second][offset_hour sign:mandatory]:[offset_minute]"
+    );
+
+    Ok(time.format(&exif_format).unwrap())
+}
+
 pub fn parse_to_exiftool_format(date_str: &str) -> Result<String, ExiftoolDateError> {
     let datetime = parse_custom_format(date_str)?;
 

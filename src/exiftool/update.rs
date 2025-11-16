@@ -1,5 +1,6 @@
 use super::spawn::spawn_exiftool;
 use crate::exposure::Exposure;
+use crate::utils::parse_time_to_exiftool_format;
 use crate::utils::paths::{PathsError, project_root};
 use console::Emoji;
 use indicatif::ProgressBar;
@@ -8,6 +9,7 @@ use snafu::prelude::*;
 use std::io::Error as IOError;
 use std::path::Path;
 use std::process::{Output, Stdio};
+use time::OffsetDateTime;
 
 static FILM: Emoji<'_, '_> = Emoji("🎞️ ", "");
 
@@ -46,7 +48,7 @@ pub fn update_exif_metadata(files: Vec<String>, exposures: Vec<Exposure>) -> Res
         exiftool(&args, &exiftool_path)?;
 
         // This needs to happen after exiftool updates the values
-        correct_dates(&exiftool_path, file.as_str())?;
+        // correct_dates(&exiftool_path, file.as_str())?;
 
         trace!("\n");
         pb.inc(1);
@@ -69,7 +71,14 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     let mut cmd = &mut cmd;
 
     if let Some(date) = &args.exposure.date {
-        cmd = cmd.arg(format!("-AllDates={}", date));
+        let now = OffsetDateTime::now_utc();
+
+        cmd = cmd.arg(format!("-DateTimeOriginal={}", date));
+        cmd = cmd.arg(format!("-CreateDate={}", date));
+        cmd = cmd.arg(format!(
+            "-ModifyDate={}",
+            parse_time_to_exiftool_format(&now).unwrap()
+        ))
     }
 
     if let Some(aperture) = args.exposure.aperture {
@@ -155,47 +164,47 @@ pub struct ExifArgs<'a> {
 }
 
 /// For some reason, the dates do not match in Apple Photos until this is run
-pub fn correct_dates(exiftool_path: &Path, photo_path: &str) -> Result<(), Error> {
-    let mut cmd = spawn_exiftool(exiftool_path);
-    let cmd = cmd.stdout(Stdio::null());
+// pub fn correct_dates(exiftool_path: &Path, photo_path: &str) -> Result<(), Error> {
+//     let mut cmd = spawn_exiftool(exiftool_path);
+//     let cmd = cmd.stdout(Stdio::null());
 
-    #[cfg(not(target_os = "windows"))]
-    let mut cmd = cmd.arg(exiftool_path);
+//     #[cfg(not(target_os = "windows"))]
+//     let mut cmd = cmd.arg(exiftool_path);
 
-    #[cfg(target_os = "windows")]
-    let mut cmd = &mut cmd;
+//     #[cfg(target_os = "windows")]
+//     let mut cmd = &mut cmd;
 
-    cmd = cmd.arg(String::from("-DateCreated<CreateDate"));
-    cmd = cmd.arg(String::from("-TimeCreated<CreateDate"));
+//     cmd = cmd.arg(String::from("-DateCreated<CreateDate"));
+//     cmd = cmd.arg(String::from("-TimeCreated<CreateDate"));
 
-    cmd = cmd.arg(photo_path);
+//     cmd = cmd.arg(photo_path);
 
-    #[cfg(not(target_os = "windows"))]
-    let output: Output = {
-        let child = cmd.spawn().context(ExiftoolSpawnSnafu {
-            path: format!("{}", exiftool_path.display()),
-        })?;
+//     #[cfg(not(target_os = "windows"))]
+//     let output: Output = {
+//         let child = cmd.spawn().context(ExiftoolSpawnSnafu {
+//             path: format!("{}", exiftool_path.display()),
+//         })?;
 
-        child.wait_with_output().context(ExiftoolWaitSnafu)?
-    };
+//         child.wait_with_output().context(ExiftoolWaitSnafu)?
+//     };
 
-    #[cfg(target_os = "windows")]
-    let output: Output = {
-        cmd.output().context(ExiftoolSpawnSnafu {
-            path: format!("{}", exiftool_path.display()),
-        })?
-    };
+//     #[cfg(target_os = "windows")]
+//     let output: Output = {
+//         cmd.output().context(ExiftoolSpawnSnafu {
+//             path: format!("{}", exiftool_path.display()),
+//         })?
+//     };
 
-    if output.status.success() {
-        Ok(())
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
+//     if output.status.success() {
+//         Ok(())
+//     } else {
+//         let stderr = String::from_utf8_lossy(&output.stderr);
 
-        Err(Error::ExiftoolExe {
-            stderr: stderr.to_string(),
-        })
-    }
-}
+//         Err(Error::ExiftoolExe {
+//             stderr: stderr.to_string(),
+//         })
+//     }
+// }
 
 type Error = UpdateError;
 
