@@ -1,5 +1,6 @@
 use crate::exposure::{
-    Camera, ExposureCompensation, Lens, LensKind, ShutterSpeed, ShutterSpeedError,
+    Camera, ExposureCompensation, GeoLocation, GeoLocationError, Lens, LensKind, ShutterSpeed,
+    ShutterSpeedError,
 };
 use crate::film_logbook::adapter::{find_adapter, read_adapters};
 use crate::utils::{
@@ -97,6 +98,13 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
             let date = Some(date);
             debug!("Date {:?}", date);
 
+            let geo_location =
+                GeoLocation::try_from(picture.location.as_str()).context(GeoLocationSnafu {
+                    frame_number: picture.frame_number,
+                })?;
+            let geo_location = Some(geo_location);
+            debug!("{:?}", geo_location);
+
             debug!("-------");
 
             if camera.is_none() {
@@ -125,6 +133,7 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
                 shutter_speed,
                 exposure_compensation,
                 date,
+                geo_location,
             };
 
             exposures.push(exposure);
@@ -265,6 +274,16 @@ pub enum ParseError {
     #[snafu(display("Failed to parse the time (frame #{}): {}", frame_number, source))]
     Time {
         source: ExiftoolDateError,
+        frame_number: usize,
+    },
+
+    #[snafu(display(
+        "Failed to parse the geo location (frame #{}): {}",
+        frame_number,
+        source
+    ))]
+    GeoLocation {
+        source: GeoLocationError,
         frame_number: usize,
     },
 }

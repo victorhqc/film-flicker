@@ -1,6 +1,6 @@
 use super::spawn::spawn_exiftool;
 use crate::exposure::Exposure;
-use crate::utils::paths::{project_root, PathsError};
+use crate::utils::paths::{PathsError, project_root};
 use console::Emoji;
 use indicatif::ProgressBar;
 use log::{debug, trace};
@@ -110,6 +110,11 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
         cmd = cmd.arg(format!("-ExposureCompensation={:.2}", exp_comp.value()));
     }
 
+    if let Some(geo) = &args.exposure.geo_location {
+        cmd = cmd.arg(format!("-GPSLatitude={}", geo.latitude));
+        cmd = cmd.arg(format!("-GPSLongitude={}", geo.longitude));
+    }
+
     let cmd = cmd.arg(args.file);
 
     #[cfg(not(target_os = "windows"))]
@@ -148,7 +153,11 @@ type Error = UpdateError;
 
 #[derive(Debug, Snafu)]
 pub enum UpdateError {
-    #[snafu(display("The amount of images do not match the number of exposures, photos found: {}, exposures in metadata: {}", photos, exposures))]
+    #[snafu(display(
+        "The amount of images do not match the number of exposures, photos found: {}, exposures in metadata: {}",
+        photos,
+        exposures
+    ))]
     BadInformation { photos: usize, exposures: usize },
 
     #[snafu(display("Failed to run exiftool \"{}\": {:?}", path, source))]

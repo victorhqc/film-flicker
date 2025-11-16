@@ -2,11 +2,13 @@ use regex::Regex;
 
 mod camera;
 mod exposure_compensation;
+mod geo_location;
 mod lens;
 mod shutter_speed;
 
 pub use camera::*;
 pub use exposure_compensation::*;
+pub use geo_location::*;
 pub use lens::*;
 pub use shutter_speed::*;
 
@@ -19,6 +21,7 @@ pub struct Exposure {
     pub aperture: Option<f32>,
     pub shutter_speed: Option<ShutterSpeed>,
     pub exposure_compensation: Option<ExposureCompensation>,
+    pub geo_location: Option<GeoLocation>,
 }
 
 impl Exposure {
