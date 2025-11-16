@@ -55,14 +55,29 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
 
         for picture in pictures {
             debug!("Picture {:?}", picture);
+            debug!("-------");
 
             let picture_and_adapter = PictureAndAdapter(&picture, adapters);
 
             let camera = Option::<Camera>::from(&picture_and_adapter);
-            debug!("Camera {:?}", camera);
+            debug!("{:?}", camera);
 
             let lens = Option::<Lens>::from(&picture_and_adapter);
-            debug!("lens {:?}", lens);
+            debug!("{:?}", lens);
+
+            debug!("-------");
+
+            if camera.is_none() {
+                return Err(ParseError::MissingCamera {
+                    frame_number: picture.frame_number,
+                });
+            }
+
+            if lens.is_none() {
+                return Err(ParseError::MissingLens {
+                    frame_number: picture.frame_number,
+                });
+            }
 
             unimplemented!()
             // let exposure = Exposure { camera };
@@ -163,29 +178,31 @@ struct FilmLogbookLens {
 }
 
 #[derive(Debug, Snafu)]
-pub enum ParseError {}
+pub enum ParseError {
+    #[snafu(display(
+        "Failed to find a camera for a picture (frame #{}). Verify the adapters",
+        frame_number
+    ))]
+    MissingCamera { frame_number: usize },
+
+    #[snafu(display(
+        "Failed to find a lens for a picture (frame #{}). Verify the adapters",
+        frame_number
+    ))]
+    MissingLens { frame_number: usize },
+}
 
 #[derive(Debug, Snafu)]
 pub enum JSONError {
     #[snafu(display("Failed to read JSON: {}", source))]
-    ReadJSON {
-        source: std::io::Error,
-    },
+    ReadJSON { source: std::io::Error },
 
     #[snafu(display("Failed to build adapter: {}", source))]
-    Adapter {
-        source: AdapterError,
-    },
+    Adapter { source: AdapterError },
 
     #[snafu(display("Failed to parse JSON: {}", source))]
-    ParseJSON {
-        source: serde_json::Error,
-    },
+    ParseJSON { source: serde_json::Error },
 
     #[snafu(display("Failed to build exposures: {}", source))]
-    ParseExposure {
-        source: ParseError,
-    },
-
-    FocalLength,
+    ParseExposure { source: ParseError },
 }
