@@ -3,7 +3,8 @@ use crate::exposure::{
 };
 use crate::film_logbook::adapter::{find_adapter, read_adapters};
 use crate::utils::{
-    ParseExposureCompensationError, parse_aperture, parse_exposure_compensation, parse_mm,
+    ExiftoolDateError, ParseExposureCompensationError, parse_aperture, parse_exposure_compensation,
+    parse_mm, parse_to_exiftool_format,
 };
 use crate::{exif_metadata::ReadExifMetadata, exposure::Exposure};
 
@@ -90,6 +91,12 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
             let exposure_compensation: Option<ExposureCompensation> = Some(exposure_compensation);
             debug!("{:?}", exposure_compensation);
 
+            let date = parse_to_exiftool_format(&picture.time).context(TimeSnafu {
+                frame_number: picture.frame_number,
+            })?;
+            let date = Some(date);
+            debug!("Date {:?}", date);
+
             debug!("-------");
 
             if camera.is_none() {
@@ -110,17 +117,17 @@ impl<'a> TryFrom<&'a PayloadAndAdapter<'a>> for Vec<Exposure> {
                 });
             }
 
-            // let exposure = Exposure {
-            //     camera,
-            //     lens,
-            //     iso,
-            //     aperture,
-            //     shutter_speed,
-            //     exposure_compensation,
-            // };
+            let exposure = Exposure {
+                camera,
+                lens,
+                iso,
+                aperture,
+                shutter_speed,
+                exposure_compensation,
+                date,
+            };
 
-            // exposures.push(exposure);
-            unimplemented!()
+            exposures.push(exposure);
         }
 
         Ok(exposures)
@@ -252,6 +259,12 @@ pub enum ParseError {
     ))]
     EsposureCompensation {
         source: ParseExposureCompensationError,
+        frame_number: usize,
+    },
+
+    #[snafu(display("Failed to parse the time (frame #{}): {}", frame_number, source))]
+    Time {
+        source: ExiftoolDateError,
         frame_number: usize,
     },
 }
