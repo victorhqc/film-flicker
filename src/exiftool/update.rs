@@ -1,7 +1,7 @@
 use super::spawn::spawn_exiftool;
 use crate::exposure::Exposure;
 use crate::utils::parse_time_to_exiftool_format;
-use crate::utils::paths::{PathsError, project_root};
+use crate::utils::paths::{project_root, PathsError};
 use console::Emoji;
 use indicatif::ProgressBar;
 use log::{debug, trace};
@@ -127,6 +127,20 @@ fn exiftool(args: &ExifArgs, exiftool_path: &Path) -> Result<(), Error> {
     if let Some(geo) = &args.exposure.geo_location {
         cmd = cmd.arg(format!("-GPSLatitude={}", geo.latitude));
         cmd = cmd.arg(format!("-GPSLongitude={}", geo.longitude));
+
+        cmd = cmd.arg(if geo.latitude >= 0.0 {
+            "-GPSLatitudeRef=N"
+        } else {
+            "-GPSLatitudeRef=S"
+        });
+        cmd = cmd.arg(if geo.longitude >= 0.0 {
+            "-GPSLongitudeRef=E"
+        } else {
+            "-GPSLongitudeRef=W"
+        });
+
+        // Optional but recommended for some apps
+        cmd = cmd.arg("-GPSVersionID=2.3.0.0");
     }
 
     let cmd = cmd.arg(args.file);

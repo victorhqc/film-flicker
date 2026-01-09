@@ -22,6 +22,13 @@ impl TryFrom<&str> for GeoLocation {
             .parse::<f64>()
             .map_err(|_| GeoLocationError::InvalidLongitude)?;
 
+        if !(-90.0..=90.0).contains(&latitude) {
+            return Err(GeoLocationError::InvalidLatitude)?;
+        }
+        if !(-180.0..=180.0).contains(&longitude) {
+            return Err(GeoLocationError::InvalidLongitude)?;
+        }
+
         Ok(GeoLocation {
             latitude,
             longitude,
